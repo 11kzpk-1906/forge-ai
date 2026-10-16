@@ -23,3 +23,11 @@
     "typescript": "^5.9.2"
   }
 }
+{
+  "name": "@arnavpawar671-ctrl/forgeai",
+  "version": "1.0.0",
+  "description": "Developer tools for ForgeAI",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT"
+}
