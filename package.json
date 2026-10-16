@@ -1,1 +1,7 @@
-{"name":"forge-ai","version":"0.1.0","private":true,"description":"ForgeAI — an AI software engineer built for developers.","packageManager":"pnpm@12.13.0","scripts":{"dev:web":"pnpm --filter @forgeai/web dev","build:web":"pnpm --filter @forgeai/web build","dev:desktop":"pnpm --filter @forgeai/desktop dev","package:desktop":"pnpm build:web && pnpm --filter @forgeai/desktop package","make:desktop":"pnpm build:web && pnpm --filter @forgeai/desktop make","lint:web":"pnpm --filter @forgeai/web lint","dev:api":"cd apps/api && python -m app.main","test:api":"python -m pytest apps/api/tests"},"devDependencies":{"typescript":"^5.9.2"}}
+{
+  "name": "forge-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ForgeAI — an AI software engineer built for developers.",
+  "packageManager": "pnpm@12.13.0"
+}
