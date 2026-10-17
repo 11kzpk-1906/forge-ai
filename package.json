@@ -1,7 +1,7 @@
 {
   "name": "forge-ai",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "description": "ForgeAI — an AI software engineer built for developers.",
   "packageManager": "pnpm@12.13.0"
 }
