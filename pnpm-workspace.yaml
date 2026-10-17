@@ -4,6 +4,7 @@ packages:
 
 nodeLinker: hoisted
 
-onlyBuiltDependencies:
-  - electron
-  - esbuild
+allowBuilds:
+  electron: true
+  electron-winstaller: true
+  esbuild: true
