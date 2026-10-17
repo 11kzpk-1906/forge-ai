@@ -29,7 +29,7 @@ export function getApiBaseUrl(): string {
       throw new Error("ForgeAI requires HTTPS for API requests outside local development.");
     }
 
-    return parsed.toString().replace(/\\/+$/, "");
+    return parsed.toString().replace(/\/+$/, "");
   }
 
   // Keep the local development default when no API URL is configured.
