@@ -1,5 +1,7 @@
 import React, { useState, type FormEvent } from "react";
 import { supabase } from "../../lib/supabase";
+import "./AuthScreen.css";
+
 const logoUrl = new URL("../../assets/logo.svg", import.meta.url).href;
 
 export function AuthScreen() {
@@ -25,7 +27,7 @@ export function AuthScreen() {
       if (password.length < 6) throw new Error("Password must be at least 6 characters.");
 
       if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email: normalizedEmail,
           password,
           options: { data: { display_name: displayName.trim() } },
@@ -36,7 +38,6 @@ export function AuthScreen() {
           throw error;
         }
 
-        console.log("ForgeAI signup response:", data);
         setMessage("Account created. Check your email and verify your account before signing in.");
         setVerificationSent(true);
         setPassword("");
@@ -220,13 +221,19 @@ export function AuthScreen() {
         <div className="auth-divider"><span>OR CONTINUE WITH</span></div>
 
         <button className="auth-google" type="button" onClick={handleGoogleSignIn} disabled={busy}>
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="#4285F4" d="M21.35 12.27c0-.68-.06-1.34-.18-1.97H12v3.73h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.7 2.91-4.2 2.91-7.15Z"/>
-            <path fill="#34A853" d="M12 21.72c2.63 0 4.84-.87 6.45-2.35l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.29v2.53A9.73 9.73 0 0 0 12 21.72Z"/>
-            <path fill="#FBBC05" d="M6.53 13.81A5.84 5.84 0 0 1 6.22 12c0-.63.11-1.24.31-1.81V7.66H3.29A9.73 9.73 0 0 0 2.27 12c0 1.57.38 3.05 1.02 4.34l3.24-2.53Z"/>
-            <path fill="#EA4335" d="M12 6.16c1.43 0 2.71.49 3.72 1.46l2.78-2.78C16.83 3.18 14.63 2.28 12 2.28a9.73 9.73 0 0 0-8.71 5.38l3.24 2.53c.77-2.31 2.93-4.03 5.47-4.03Z"/>
-          </svg>
-          Continue with Google
+          <span className="auth-google-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" focusable="false">
+              <path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.6c3.9-3.6 6.1-8.9 6.1-15Z"/>
+              <path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.8l-6.6-5.1c-1.8 1.2-4.2 2-6.9 2-5.3 0-9.8-3.6-11.4-8.4H5.8v5.3A20 20 0 0 0 24 44Z"/>
+              <path fill="#FBBC05" d="M12.6 27.7a12 12 0 0 1 0-7.4V15H5.8a20 20 0 0 0 0 18Z"/>
+              <path fill="#EA4335" d="M24 12.1c3 0 5.7 1 7.8 3.1l5.9-5.9C34.1 6 29.5 4 24 4A20 20 0 0 0 5.8 15l6.8 5.3c1.6-4.8 6.1-8.2 11.4-8.2Z"/>
+            </svg>
+          </span>
+          <span className="auth-google-copy">
+            <span className="auth-google-title">Continue with Google</span>
+            <span className="auth-google-subtitle">Quick, secure sign-in with your Google account</span>
+          </span>
+          <span className="auth-google-arrow" aria-hidden="true">→</span>
         </button>
 
         {message && <p className="auth-message" role="alert">{message}</p>}
