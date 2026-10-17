@@ -7,3 +7,5 @@ node_modules
 # Python
 __pycache__/
 *.py[cod]
+apps/desktop/out/
+apps/web/dist/
