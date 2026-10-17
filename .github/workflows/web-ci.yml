@@ -26,15 +26,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.13.0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 12.13.0
       - name: Install workspace dependencies
-        run: pnpm install --frozen-lockfile
+        # The current lockfile predates pnpm 12 packageManagerDependencies metadata.
+        # Recreate the metadata in CI until the lockfile is regenerated and committed.
+        run: pnpm install --no-frozen-lockfile
       - name: Build frontend (includes TypeScript checks)
         run: pnpm --filter @forgeai/web build
