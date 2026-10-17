@@ -1,4 +1,4 @@
-name: Build Windows Installer
+name: Build ForgeAI Windows Release
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
       - "v*"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-windows:
@@ -29,13 +29,25 @@ jobs:
       - name: Install desktop dependencies
         run: npm install
 
-      - name: Build Windows installer
-        run: npm run dist:win
+      - name: Build installer and ZIP
+        run: npm run build:desktop
 
-      - name: Upload installer artifact
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ForgeAI-Windows-Installer
-          path: desktop/dist/*.exe
+          name: ForgeAI-Windows-Desktop
+          path: |
+            desktop/dist/*.exe
+            desktop/dist/*.zip
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish GitHub Release assets
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ForgeAI ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            desktop/dist/*.exe
+            desktop/dist/*.zip
