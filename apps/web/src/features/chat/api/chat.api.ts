@@ -67,8 +67,14 @@ export async function streamChat({
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || "Chat request failed.");
+      let message = "Chat request failed.";
+      try {
+        const payload = await response.json();
+        message = typeof payload.detail === "string" ? payload.detail : message;
+      } catch {
+        // A non-JSON error response is still handled with a safe fallback.
+      }
+      throw new Error(message);
     }
 
     if (!response.body) {
@@ -105,7 +111,10 @@ export async function streamChat({
           completed = true;
           onDone(payload.conversation_id);
         } else if (payload.type === "error") {
-          onError(payload.message);
+          completed = true;
+          onError(payload.message || "The chat request failed.");
+          void reader.cancel();
+          return;
         }
       }
     }
