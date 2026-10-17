@@ -1,7 +1,6 @@
 const { app, BrowserWindow, ipcMain, protocol, shell } = require("electron");
 const fs = require("node:fs/promises");
 const path = require("node:path");
-const { pathToFileURL } = require("node:url");
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -19,9 +18,7 @@ protocol.registerSchemesAsPrivileged([
 if (process.platform === "win32") app.setAppUserModelId("ai.forgeai.desktop");
 
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
-if (!gotSingleInstanceLock) {
-  app.quit();
-}
+if (!gotSingleInstanceLock) app.quit();
 
 const isDev = !app.isPackaged;
 const rendererUrl = process.env.FORGEAI_DEV_URL || "http://127.0.0.1:5173/";
