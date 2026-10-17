@@ -26,6 +26,7 @@ const DEV_SERVER_RETRIES = 30;
 const DEV_SERVER_RETRY_DELAY_MS = 500;
 const OAUTH_CALLBACK_PREFIX = "forgeai://auth/callback";
 let mainWindow = null;
+let appProtocolRegistered = false;
 const pendingOAuthCallbacks = [];
 
 function sleep(ms) {
@@ -133,13 +134,21 @@ const mimeTypes = {
 };
 
 async function registerAppProtocol() {
+  if (appProtocolRegistered) return;
   const distRoot = path.resolve(process.resourcesPath, "dist");
+
   await protocol.handle("forgeai", async (request) => {
     try {
       const url = new URL(request.url);
       if (url.hostname !== "app") return new Response("Not found", { status: 404 });
 
-      const decodedPath = decodeURIComponent(url.pathname);
+      let decodedPath;
+      try {
+        decodedPath = decodeURIComponent(url.pathname);
+      } catch {
+        return new Response("Bad request", { status: 400 });
+      }
+
       const relativePath = decodedPath === "/" ? "index.html" : decodedPath.replace(/^\/+/, "");
       const filePath = path.resolve(distRoot, relativePath);
       if (filePath !== distRoot && !filePath.startsWith(distRoot + path.sep)) {
@@ -153,13 +162,15 @@ async function registerAppProtocol() {
         headers: {
           "Content-Type": mimeTypes[path.extname(filePath).toLowerCase()] || "application/octet-stream",
           "X-Content-Type-Options": "nosniff",
-          "Content-Security-Policy": "default-src 'self' https:; script-src 'self' 'unsafe-inline' https://*.supabase.co; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https: forgeai://app;",
+          "Content-Security-Policy": "default-src 'self' https:; script-src 'self' 'unsafe-inline' https://*.supabase.co; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https: forgeai:;",
         },
       });
     } catch {
       return new Response("Not found", { status: 404 });
     }
   });
+
+  appProtocolRegistered = true;
 }
 
 async function createWindow() {
