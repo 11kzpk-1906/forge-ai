@@ -1,4 +1,4 @@
-import React, { useState, type FormEvent } from "react";
+import React, { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "../../lib/supabase";
 import "./AuthScreen.css";
 
@@ -13,6 +13,34 @@ export function AuthScreen() {
   const [busy, setBusy] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = window.forgeAI?.onOAuthCallback(async (callbackUrl) => {
+      try {
+        const callback = new URL(callbackUrl);
+        if (callback.protocol !== "forgeai:" || callback.hostname !== "auth" || callback.pathname !== "/callback") {
+          throw new Error("Received an invalid Google sign-in callback.");
+        }
+
+        const providerError = callback.searchParams.get("error_description") || callback.searchParams.get("error");
+        if (providerError) throw new Error(providerError);
+
+        const code = callback.searchParams.get("code");
+        if (!code) throw new Error("Google sign-in did not return an authorization code.");
+
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) throw error;
+
+        setMessage("Google sign-in complete. Loading your workspace…");
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : "Google sign-in could not be completed.");
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    return () => unsubscribe?.();
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -110,14 +138,26 @@ export function AuthScreen() {
     setBusy(true);
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const isDesktop = window.forgeAI?.isDesktop === true;
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: window.location.origin },
+        options: {
+          redirectTo: isDesktop ? "forgeai://auth/callback" : window.location.origin,
+          skipBrowserRedirect: true,
+        },
       });
 
       if (error) {
         console.error("ForgeAI Google sign-in error:", error);
         throw error;
+      }
+
+      if (!data.url) throw new Error("Supabase did not return a Google authorization URL.");
+
+      if (isDesktop && window.forgeAI) {
+        await window.forgeAI.openOAuthUrl(data.url);
+      } else {
+        window.location.assign(data.url);
       }
     } catch (error) {
       console.error("ForgeAI Google authentication error:", error);
@@ -152,10 +192,7 @@ export function AuthScreen() {
         </div>
 
         <div className="auth-intro">
-          <div className="auth-status">
-            <span />
-            Your engineering workspace
-          </div>
+          <div className="auth-status"><span />Your engineering workspace</div>
           <h1>{mode === "signin" ? "Build without the busywork." : "Start building with ForgeAI."}</h1>
           <p>
             {mode === "signin"
@@ -168,47 +205,20 @@ export function AuthScreen() {
           {mode === "signup" && (
             <label className="auth-field">
               <span>Display name</span>
-              <input
-                value={displayName}
-                onChange={(event) => setDisplayName(event.target.value)}
-                placeholder="How should ForgeAI call you?"
-                autoComplete="name"
-              />
+              <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder="How should ForgeAI call you?" autoComplete="name" />
             </label>
           )}
 
           <label className="auth-field">
             <span>Email</span>
-            <input
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="you@example.com"
-              type="email"
-              autoComplete="email"
-              required
-            />
+            <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" type="email" autoComplete="email" required />
           </label>
 
           <label className="auth-field">
             <span>Password</span>
             <div className="auth-password-wrap">
-              <input
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="Enter your password"
-                type={showPassword ? "text" : "password"}
-                autoComplete={mode === "signin" ? "current-password" : "new-password"}
-                minLength={6}
-                required
-              />
-              <button
-                className="auth-password-toggle"
-                type="button"
-                onClick={() => setShowPassword((value) => !value)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
+              <input value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Enter your password" type={showPassword ? "text" : "password"} autoComplete={mode === "signin" ? "current-password" : "new-password"} minLength={6} required />
+              <button className="auth-password-toggle" type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? "Hide" : "Show"}</button>
             </div>
           </label>
 
@@ -239,9 +249,7 @@ export function AuthScreen() {
         {message && <p className="auth-message" role="alert">{message}</p>}
 
         {verificationSent && (
-          <button className="auth-resend" type="button" onClick={() => void handleResendVerification()} disabled={busy}>
-            Resend verification email
-          </button>
+          <button className="auth-resend" type="button" onClick={() => void handleResendVerification()} disabled={busy}>Resend verification email</button>
         )}
 
         <button className="auth-switch" type="button" onClick={toggleMode}>
