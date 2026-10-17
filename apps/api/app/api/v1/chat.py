@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import logging
 from collections.abc import AsyncIterator
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
@@ -21,20 +23,21 @@ from app.core.security import get_current_user
 from app.infrastructure.ai.base import AIMessage, AIRequest
 from app.infrastructure.ai.router import ai_router
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 
 class ChatMessage(BaseModel):
-    role: str
-    content: str
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=100_000)
 
 
 class ChatRequest(BaseModel):
-    messages: list[ChatMessage] = Field(min_length=1)
-    mode: str = "explain"
-    personality: str = "friendly_engineer"
-    model: str | None = None
-    conversation_id: str | None = None
+    messages: list[ChatMessage] = Field(min_length=1, max_length=100)
+    mode: str = Field(default="explain", min_length=1, max_length=40)
+    personality: str = Field(default="friendly_engineer", min_length=1, max_length=80)
+    model: str | None = Field(default=None, max_length=120)
+    conversation_id: str | None = Field(default=None, max_length=100)
 
 
 def _conversation_title(message: str) -> str:
@@ -54,10 +57,7 @@ def _clean_ai_title(title: str) -> str:
     return cleaned if len(words) <= 8 else " ".join(words[:8])
 
 
-async def _generate_ai_title(
-    messages: list[ChatMessage],
-    model: str | None,
-) -> str:
+async def _generate_ai_title(messages: list[ChatMessage], model: str | None) -> str:
     recent_messages = messages[-8:]
     conversation_text = "\n".join(
         f"{message.role.upper()}: {message.content.strip()}"
@@ -93,10 +93,7 @@ async def _generate_ai_title(
     return _clean_ai_title(response.content)
 
 
-async def generate_stream(
-    request: ChatRequest,
-    user_id: str,
-) -> AsyncIterator[str]:
+async def generate_stream(request: ChatRequest, user_id: str) -> AsyncIterator[str]:
     last_user_message = next(
         (
             message.content.strip()
@@ -125,20 +122,10 @@ async def generate_stream(
                 model=request.model,
             )
             conversation_id = str(conversation["id"])
+            yield "data: " + json.dumps(
+                {"type": "conversation", "conversation": conversation}
+            ) + "\n\n"
 
-            yield (
-                "data: "
-                + json.dumps(
-                    {
-                        "type": "conversation",
-                        "conversation": conversation,
-                    }
-                )
-                + "\n\n"
-            )
-
-        # Only persist the newest user message. The full message list is still
-        # sent to the model so the current request retains conversation context.
         save_message(
             conversation_id=conversation_id,
             role="user",
@@ -161,17 +148,14 @@ async def generate_stream(
         )
 
         assistant_content: list[str] = []
-
         async for chunk in send_message_service.stream(command):
             if chunk.content:
                 assistant_content.append(chunk.content)
-                payload = json.dumps(
+                yield "data: " + json.dumps(
                     {"type": "token", "content": chunk.content}
-                )
-                yield f"data: {payload}\n\n"
+                ) + "\n\n"
 
         complete_assistant_message = "".join(assistant_content)
-
         if complete_assistant_message:
             save_message(
                 conversation_id=conversation_id,
@@ -182,15 +166,11 @@ async def generate_stream(
                 personality=request.personality,
             )
 
-        # Generate the AI title only for the first turn of a conversation.
-        # Later messages keep the existing chat-history title stable.
         if is_new_conversation:
             try:
-                ai_title = await _generate_ai_title(
-                    request.messages,
-                    request.model,
-                )
+                ai_title = await _generate_ai_title(request.messages, request.model)
             except Exception:
+                logger.exception("AI conversation title generation failed")
                 ai_title = _conversation_title(last_user_message)
 
             touch_conversation(
@@ -198,38 +178,26 @@ async def generate_stream(
                 user_id=user_id,
                 title=ai_title,
             )
-
-            yield (
-                "data: "
-                + json.dumps(
-                    {
-                        "type": "conversation_title",
-                        "conversation_id": conversation_id,
-                        "title": ai_title,
-                    }
-                )
-                + "\n\n"
-            )
-
-        yield (
-            "data: "
-            + json.dumps(
+            yield "data: " + json.dumps(
                 {
-                    "type": "done",
+                    "type": "conversation_title",
                     "conversation_id": conversation_id,
+                    "title": ai_title,
                 }
-            )
-            + "\n\n"
-        )
+            ) + "\n\n"
 
-    except Exception as exc:
-        payload = json.dumps(
+        yield "data: " + json.dumps(
+            {"type": "done", "conversation_id": conversation_id}
+        ) + "\n\n"
+
+    except Exception:
+        logger.exception("Chat stream failed")
+        yield "data: " + json.dumps(
             {
                 "type": "error",
-                "message": str(exc),
+                "message": "The chat request failed. Check your API configuration and try again.",
             }
-        )
-        yield f"data: {payload}\n\n"
+        ) + "\n\n"
 
 
 @router.post("")
@@ -237,10 +205,10 @@ async def chat(
     request: ChatRequest,
     current_user=Depends(get_current_user),
 ):
-    if not request.messages:
+    if not any(message.role == "user" for message in request.messages):
         raise HTTPException(
             status_code=400,
-            detail="At least one message is required.",
+            detail="At least one user message is required.",
         )
 
     return StreamingResponse(
