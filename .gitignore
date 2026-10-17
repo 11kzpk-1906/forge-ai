@@ -7,5 +7,5 @@ node_modules
 # Python
 __pycache__/
 *.py[cod]
-# Electron build output
 apps/desktop/out/
+apps/web/dist/

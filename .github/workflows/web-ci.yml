@@ -5,11 +5,15 @@ on:
     paths:
       - "apps/web/**"
       - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - ".github/workflows/web-ci.yml"
   pull_request:
     paths:
       - "apps/web/**"
       - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - ".github/workflows/web-ci.yml"
   workflow_dispatch:
 
@@ -17,10 +21,20 @@ permissions:
   contents: read
 
 jobs:
-  web-scaffold:
-    name: Validate web scaffold
+  web-build:
+    name: Type-check and build frontend
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check web entry points
-        run: test -f package.json && test -f apps/web/src/main.tsx
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.13.0
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build frontend (includes TypeScript checks)
+        run: pnpm --filter @forgeai/web build

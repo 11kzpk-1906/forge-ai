@@ -1,4 +1,5 @@
 import { supabase } from "../../../lib/supabase";
+import { getApiBaseUrl } from "../../../lib/api-url";
 
 export type ChatRole = "user" | "assistant";
 
@@ -23,16 +24,11 @@ export interface StreamOptions {
   personality: string;
   conversationId?: string | null;
   onToken: (token: string) => void;
-  onConversationCreated?: (
-    conversation: ConversationCreatedPayload,
-  ) => void;
+  onConversationCreated?: (conversation: ConversationCreatedPayload) => void;
   onConversationTitle?: (conversationId: string, title: string) => void;
   onDone: (conversationId?: string) => void;
   onError: (message: string) => void;
 }
-
-const API_URL =
-  import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000";
 
 export async function streamChat({
   messages,
@@ -56,34 +52,27 @@ export async function streamChat({
       throw new Error("You must be signed in to use ForgeAI.");
     }
 
-    const response = await fetch(
-      API_URL + "/api/v1/chat",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + session.access_token,
-        },
-        body: JSON.stringify({
-          messages,
-          mode,
-          personality,
-          conversation_id: conversationId ?? null,
-        }),
+    const response = await fetch(getApiBaseUrl() + "/api/v1/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + session.access_token,
       },
-    );
+      body: JSON.stringify({
+        messages,
+        mode,
+        personality,
+        conversation_id: conversationId ?? null,
+      }),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(
-        errorText || "Chat request failed.",
-      );
+      throw new Error(errorText || "Chat request failed.");
     }
 
     if (!response.body) {
-      throw new Error(
-        "Streaming is not supported by this response.",
-      );
+      throw new Error("Streaming is not supported by this response.");
     }
 
     const reader = response.body.getReader();
@@ -92,69 +81,37 @@ export async function streamChat({
 
     while (true) {
       const { value, done } = await reader.read();
+      if (done) break;
 
-      if (done) {
-        break;
-      }
-
-      buffer += decoder.decode(value, {
-        stream: true,
-      });
-
+      buffer += decoder.decode(value, { stream: true });
       const events = buffer.split("\n\n");
       buffer = events.pop() ?? "";
 
       for (const event of events) {
-        const line = event
-          .split("\n")
-          .find((item) => item.startsWith("data:"));
-
-        if (!line) {
-          continue;
-        }
+        const line = event.split("\n").find((item) => item.startsWith("data:"));
+        if (!line) continue;
 
         const json = line.slice(5).trim();
-
-        if (!json) {
-          continue;
-        }
+        if (!json) continue;
 
         const payload = JSON.parse(json);
-
         if (payload.type === "conversation") {
           onConversationCreated?.(payload.conversation);
-        }
-
-        if (payload.type === "conversation_title") {
-          onConversationTitle?.(
-            payload.conversation_id,
-            payload.title,
-          );
-        }
-
-        if (payload.type === "token") {
+        } else if (payload.type === "conversation_title") {
+          onConversationTitle?.(payload.conversation_id, payload.title);
+        } else if (payload.type === "token") {
           onToken(payload.content);
-        }
-
-        if (payload.type === "done") {
+        } else if (payload.type === "done") {
           completed = true;
           onDone(payload.conversation_id);
-        }
-
-        if (payload.type === "error") {
+        } else if (payload.type === "error") {
           onError(payload.message);
         }
       }
     }
 
-    if (!completed) {
-      onDone(conversationId ?? undefined);
-    }
+    if (!completed) onDone(conversationId ?? undefined);
   } catch (error) {
-    onError(
-      error instanceof Error
-        ? error.message
-        : "Something went wrong.",
-    );
+    onError(error instanceof Error ? error.message : "Something went wrong.");
   }
 }
