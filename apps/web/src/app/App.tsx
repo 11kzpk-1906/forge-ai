@@ -640,7 +640,7 @@ function App() {
 
 
         {showMemory ? (
-          <MemoryPanel />
+          <MemoryPanel conversationId={activeConversationId} />
         ) : showSettings ? (
           <section className="settings-panel">
             <div className="settings-heading">
