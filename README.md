@@ -2,40 +2,78 @@
 
 ⚙️ **ForgeAI — AI Software Engineer**
 
-ForgeAI is an engineering-focused AI assistant designed to help developers think through software problems, write and understand code, and improve their development workflow.
+ForgeAI is an engineering-focused AI assistant designed to help developers understand code, investigate bugs, plan software architecture, and improve their development workflow.
 
-## What ForgeAI aims to help with
+> ForgeAI is actively being developed. Features and deployment readiness can change between releases.
 
-- **Coding:** Explore implementation approaches and generate code examples.
-- **Debugging:** Understand errors and investigate possible fixes.
-- **Code reviews:** Identify potential issues and suggest improvements.
-- **Architecture & system design:** Plan components, APIs, and technical trade-offs.
-- **Testing:** Think through test cases and quality checks.
-- **DevOps & security:** Get guidance on deployment workflows and secure development practices.
+## Current stack
 
-> ForgeAI is a work in progress. The capabilities above describe the project's goals; availability depends on the current implementation.
+- **Web:** React, TypeScript, Vite
+- **API:** Python, FastAPI
+- **AI provider:** Groq
+- **Authentication and persistence:** Supabase
+- **Hosting:** Vercel (web) and Render (API), when configured
 
-## Project goals
+## Local development
 
-- Provide a clear, developer-friendly experience.
-- Make technical explanations practical and easy to follow.
-- Help developers reason about trade-offs instead of just returning code.
-- Grow through small, reviewable improvements.
+### Prerequisites
 
-## Development
+- Node.js 22+
+- pnpm 12+
+- Python 3.11+
+- A Supabase project
+- A Groq API key
 
-This repository is under active development. Setup instructions and implementation details will be added as the project structure and tooling are finalized.
+### 1. Configure the API
+
+Copy `apps/api/.env.example` to `apps/api/.env` and set the server-side values:
+
+- `GROQ_API_KEY`
+- `GROQ_MODEL` (optional; defaults to the model in the example)
+- `SUPABASE_URL`
+- `SUPABASE_SECRET_KEY`
+- `CORS_ORIGINS` (comma-separated exact browser origins)
+
+Install and run the API from `apps/api` using the commands documented in its `pyproject.toml`. The development API defaults to `http://127.0.0.1:8000`.
+
+### 2. Configure the web app
+
+Copy `apps/web/.env.example` to `apps/web/.env` and set:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+For local development, leave `VITE_API_URL` unset; the web app defaults to the local API. Never put a Groq key or Supabase server-side secret in a `VITE_*` variable.
+
+### 3. Install and run the web app
+
+From the repository root:
+
+```bash
+pnpm install
+pnpm --filter @forgeai/web dev
+```
+
+Build and type-check the frontend with:
+
+```bash
+pnpm --filter @forgeai/web build
+```
+
+For production deployment requirements, environment variables, and authentication redirect setup, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+
+## Engineering modes
+
+The API prompt engine defines modes for explaining, debugging, architecture, code review, implementation, testing, security, DevOps, and optimization. The actual behavior also depends on the configured AI provider and the current implementation.
 
 ## Contributing
 
-Contributions and suggestions are welcome. You can help by reporting bugs, proposing features, improving documentation, or submitting a pull request.
-
-For larger changes, consider opening an issue first so the proposed work can be discussed.
+Bug reports, feature proposals, documentation improvements, and pull requests are welcome. Please keep changes focused and include tests or verification steps where practical.
 
 ## Roadmap
 
-See the [open issues](https://github.com/arnavpawar671-ctrl/forge-ai/issues) for planned work and current tasks.
+Browse [open issues](https://github.com/11kzpk-1906/forge-ai/issues) and [pull requests](https://github.com/11kzpk-1906/forge-ai/pulls).
 
 ## License
 
-A license has not been specified yet. Until one is added, all rights are reserved by the repository owner.
+See the repository's `LICENSE` file for licensing terms.
