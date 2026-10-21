@@ -3,6 +3,7 @@ const logoUrl = new URL("../assets/logo.svg", import.meta.url).href;
 import { ParticleField } from "../components/ParticleField";
 import { useAuth } from "./providers/AuthProvider";
 import { useChat } from "../features/chat/hooks/useChat";
+import { MemoryPanel } from "../features/memory/MemoryPanel";
 import {
   deleteConversation,
   getConversationMessages,
@@ -151,6 +152,7 @@ function App() {
     useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [showSettings, setShowSettings] = useState(false);
+  const [showMemory, setShowMemory] = useState(false);
   const [showAllModes, setShowAllModes] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [historyError, setHistoryError] = useState<string | null>(null);
@@ -451,6 +453,7 @@ function App() {
     setActiveConversationId(null);
     setHistoryError(null);
     setShowSettings(false);
+    setShowMemory(false);
     setMessage("");
   };
 
@@ -497,6 +500,16 @@ function App() {
             <span>＋</span>
             <strong>New chat</strong>
             <kbd>⌘ K</kbd>
+          </button>
+
+          <button
+            className={showMemory ? "memory-nav-button active" : "memory-nav-button"}
+            onClick={() => { setShowMemory(true); setShowSettings(false); }}
+            aria-current={showMemory ? "page" : undefined}
+          >
+            <span className="memory-nav-icon">◇</span>
+            <span>Memory vault</span>
+            <span className="memory-nav-arrow">↗</span>
           </button>
 
           <div className="sidebar-section-label">RECENT</div>
@@ -574,7 +587,7 @@ function App() {
             <div className="plan-card-top"><span>Free plan</span><strong>7 / 10</strong></div>
             <div className="plan-progress"><span /></div>
           </div>
-          <button className="sidebar-settings-button" title="Settings" onClick={() => setShowSettings(true)}>⚙</button>
+          <button className="sidebar-settings-button" title="Settings" onClick={() => { setShowSettings(true); setShowMemory(false); }}>⚙</button>
         </div>
       </aside>
 
@@ -614,7 +627,7 @@ function App() {
             <button
               className="header-icon-button"
               title="Settings"
-              onClick={() => setShowSettings((value) => !value)}
+              onClick={() => { setShowSettings((value) => !value); setShowMemory(false); }}
             >
               ⚙
             </button>
@@ -622,7 +635,9 @@ function App() {
         </header>
 
 
-        {showSettings ? (
+        {showMemory ? (
+          <MemoryPanel />
+        ) : showSettings ? (
           <section className="settings-panel">
             <div className="settings-heading">
               <span>FORGEAI</span>
@@ -824,7 +839,7 @@ function App() {
           </section>
         )}
 
-        {!showSettings && (
+        {!showSettings && !showMemory && (
           <section className="composer-area">
             <div className="composer-mode-row">
               <div className="mode-segment">
