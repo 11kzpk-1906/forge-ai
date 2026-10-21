@@ -1348,3 +1348,20 @@ button:disabled { cursor: not-allowed; }
 .memory-editor input[aria-invalid="true"] { border-color: #cf718b; }
 .theme-light .memory-tag-limit { color: #786d88; }
 .theme-light .memory-tag-limit-error { color: #b4234d; }
+
+.memory-suggestion-toolbar, .memory-suggestions { margin: 16px 0; }
+.memory-suggestion-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; border: 1px solid #34283f; border-radius: 14px; background: rgba(18, 15, 26, .55); }
+.memory-suggestion-toolbar strong { color: #e8e0f5; font-size: 12px; }
+.memory-suggestion-toolbar p { margin: 5px 0 0; color: #8b819b; font-size: 10px; line-height: 1.6; }
+.memory-suggestion-toolbar button { flex-shrink: 0; }
+.memory-suggestions { display: grid; gap: 10px; }
+.memory-suggestions-heading { display: flex; align-items: baseline; gap: 10px; }
+.memory-suggestions-heading h2 { margin: 0; color: #e8e0f5; font-size: 14px; }
+.memory-suggestions-heading span { color: #a78bfa; font-size: 10px; }
+.memory-suggestion-card { padding: 15px; border: 1px solid #3b304b; border-radius: 14px; background: rgba(18, 15, 26, .5); }
+.memory-suggestion-card h3 { margin: 0; color: #e8e0f5; font-size: 13px; }
+.memory-suggestion-card > p { color: #aaa0b8; font-size: 11px; line-height: 1.7; white-space: pre-wrap; }
+.theme-light .memory-suggestion-toolbar, .theme-light .memory-suggestion-card { background: #fff; border-color: #e3d9ef; }
+.theme-light .memory-suggestion-toolbar strong, .theme-light .memory-suggestions-heading h2, .theme-light .memory-suggestion-card h3 { color: #2a2234; }
+.theme-light .memory-suggestion-toolbar p, .theme-light .memory-suggestion-card > p { color: #746b82; }
+@media (max-width: 720px) { .memory-suggestion-toolbar { align-items: stretch; flex-direction: column; } }
