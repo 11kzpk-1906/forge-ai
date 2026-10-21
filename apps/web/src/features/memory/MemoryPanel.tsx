@@ -8,6 +8,7 @@ import {
 } from "./memory.api";
 
 const emptyForm = { title: "", content: "", tags: "" };
+const MAX_MEMORY_TAGS = 20;
 
 export function MemoryPanel() {
   const [memories, setMemories] = useState<MemoryItem[]>([]);
@@ -19,6 +20,8 @@ export function MemoryPanel() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const parsedTags = form.tags.split(",").map((tag) => tag.trim()).filter(Boolean);
+  const tagLimitExceeded = parsedTags.length > MAX_MEMORY_TAGS;
 
   const refresh = useCallback(async (search = query) => {
     setLoading(true);
@@ -53,13 +56,18 @@ export function MemoryPanel() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSaving(true);
     setError(null);
     setNotice(null);
+    const tags = form.tags.split(",").map((tag) => tag.trim()).filter(Boolean);
+    if (tags.length > MAX_MEMORY_TAGS) {
+      setError(`You can add up to ${MAX_MEMORY_TAGS} tags per memory. Remove ${tags.length - MAX_MEMORY_TAGS} tag${tags.length - MAX_MEMORY_TAGS === 1 ? "" : "s"} to continue.`);
+      return;
+    }
+    setSaving(true);
     const input = {
       title: form.title.trim(),
       content: form.content.trim(),
-      tags: form.tags.split(",").map((tag) => tag.trim()).filter(Boolean),
+      tags,
     };
     try {
       if (editingId) await updateMemory(editingId, input);
@@ -120,10 +128,10 @@ export function MemoryPanel() {
           </div>
           <label>Title<input required maxLength={160} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="e.g. ForgeAI architecture" /></label>
           <label>Details<textarea required maxLength={12000} rows={4} value={form.content} onChange={(event) => setForm({ ...form, content: event.target.value })} placeholder="Write a useful preference, project detail, or technical decision…" /></label>
-          <label>Tags <span className="memory-label-hint">comma-separated</span><input value={form.tags} onChange={(event) => setForm({ ...form, tags: event.target.value })} placeholder="React, API, preferences" /></label>
+          <label>Tags <span className="memory-label-hint">comma-separated · up to {MAX_MEMORY_TAGS}</span><input value={form.tags} aria-describedby="memory-tag-help" aria-invalid={tagLimitExceeded} onChange={(event) => setForm({ ...form, tags: event.target.value })} placeholder="React, API, preferences" /><span id="memory-tag-help" className={tagLimitExceeded ? "memory-tag-limit memory-tag-limit-error" : "memory-tag-limit"} role={tagLimitExceeded ? "alert" : "status"}>{parsedTags.length}/{MAX_MEMORY_TAGS} tags{tagLimitExceeded ? ` — remove ${parsedTags.length - MAX_MEMORY_TAGS} to save.` : ""}</span></label>
           <div className="memory-form-actions">
             <button type="button" className="memory-secondary-button" onClick={resetForm}>Cancel</button>
-            <button type="submit" className="memory-primary-button" disabled={saving}>{saving ? "Saving…" : editingId ? "Save changes" : "Save memory"}</button>
+            <button type="submit" className="memory-primary-button" disabled={saving || tagLimitExceeded}>{saving ? "Saving…" : editingId ? "Save changes" : "Save memory"}</button>
           </div>
         </form>
       )}

@@ -35,8 +35,22 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     let message = "Memory request failed.";
     try {
       const payload: unknown = await response.json();
-      if (typeof payload === "object" && payload !== null && "detail" in payload && typeof payload.detail === "string") {
-        message = payload.detail;
+      if (typeof payload === "object" && payload !== null && "detail" in payload) {
+        const detail = payload.detail;
+        if (typeof detail === "string") {
+          message = detail;
+        } else if (Array.isArray(detail)) {
+          const messages = detail
+            .map((item: unknown) => {
+              if (typeof item === "string") return item;
+              if (typeof item === "object" && item !== null && "msg" in item && typeof item.msg === "string") {
+                return item.msg;
+              }
+              return null;
+            })
+            .filter((item): item is string => Boolean(item));
+          if (messages.length > 0) message = messages.join(" ");
+        }
       }
     } catch {
       // Keep a useful fallback when the API doesn't return JSON.
