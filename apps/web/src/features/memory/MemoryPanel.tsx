@@ -3,14 +3,16 @@ import {
   createMemory,
   deleteMemory,
   listMemories,
+  suggestMemories,
   updateMemory,
+  type MemoryDraft,
   type MemoryItem,
 } from "./memory.api";
 
 const emptyForm = { title: "", content: "", tags: "" };
 const MAX_MEMORY_TAGS = 20;
 
-export function MemoryPanel() {
+export function MemoryPanel({ conversationId }: { conversationId: string | null }) {
   const [memories, setMemories] = useState<MemoryItem[]>([]);
   const [query, setQuery] = useState("");
   const [form, setForm] = useState(emptyForm);
@@ -20,6 +22,9 @@ export function MemoryPanel() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<MemoryDraft[]>([]);
+  const [suggesting, setSuggesting] = useState(false);
+  const [savingSuggestion, setSavingSuggestion] = useState<number | null>(null);
   const parsedTags = form.tags.split(",").map((tag) => tag.trim()).filter(Boolean);
   const tagLimitExceeded = parsedTags.length > MAX_MEMORY_TAGS;
 
@@ -82,6 +87,40 @@ export function MemoryPanel() {
     }
   };
 
+  const handleSuggest = async () => {
+    if (!conversationId) return;
+    setSuggesting(true);
+    setError(null);
+    setNotice(null);
+    setSuggestions([]);
+    try {
+      const results = await suggestMemories(conversationId);
+      setSuggestions(results);
+      setNotice(results.length ? "Review the suggestions below. Nothing is saved until you choose Save." : "No useful memory suggestions were found in this conversation.");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not suggest memories.");
+    } finally {
+      setSuggesting(false);
+    }
+  };
+
+  const handleSaveSuggestion = async (suggestion: MemoryDraft, index: number) => {
+    if (!conversationId) return;
+    setSavingSuggestion(index);
+    setError(null);
+    setNotice(null);
+    try {
+      await createMemory({ ...suggestion, source_conversation_id: conversationId });
+      setSuggestions((current) => current.filter((_, itemIndex) => itemIndex !== index));
+      setNotice("Memory saved to your vault.");
+      await refresh(query);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not save this suggestion.");
+    } finally {
+      setSavingSuggestion(null);
+    }
+  };
+
   const handleDelete = async (memory: MemoryItem) => {
     if (!window.confirm('Delete the memory "' + memory.title + '"?')) return;
     setError(null);
@@ -109,6 +148,32 @@ export function MemoryPanel() {
         </button>
       </div>
 
+      <div className="memory-suggestion-toolbar">
+        <div>
+          <strong>Find memories in a chat</strong>
+          <p>ForgeAI can suggest useful project facts and preferences for you to review.</p>
+        </div>
+        <button className="memory-secondary-button" type="button" onClick={() => void handleSuggest()} disabled={!conversationId || suggesting}>
+          {suggesting ? "Analyzing chat…" : "Suggest from current chat"}
+        </button>
+      </div>
+      {!conversationId && <p className="memory-footnote">Open a conversation first to generate suggestions from it.</p>}
+      {suggestions.length > 0 && (
+        <div className="memory-suggestions" aria-label="Suggested memories">
+          <div className="memory-suggestions-heading"><h2>Suggested memories</h2><span>Review before saving</span></div>
+          {suggestions.map((suggestion, index) => (
+            <article className="memory-suggestion-card" key={suggestion.title + index}>
+              <h3>{suggestion.title}</h3>
+              <p>{suggestion.content}</p>
+              {suggestion.tags.length > 0 && <div className="memory-tags">{suggestion.tags.map((tag, tagIndex) => <span key={tag + tagIndex}>{tag}</span>)}</div>}
+              <div className="memory-form-actions">
+                <button className="memory-secondary-button" type="button" onClick={() => setSuggestions((current) => current.filter((_, itemIndex) => itemIndex !== index))}>Dismiss</button>
+                <button className="memory-primary-button" type="button" disabled={savingSuggestion !== null} onClick={() => void handleSaveSuggestion(suggestion, index)}>{savingSuggestion === index ? "Saving…" : "Save memory"}</button>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
       <div className="memory-search-row">
         <label className="memory-search">
           <span aria-hidden="true">⌕</span>
