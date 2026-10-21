@@ -43,15 +43,37 @@ async function authorizedFetch(path: string, init?: RequestInit): Promise<Respon
 export async function listConversations(): Promise<Conversation[]> {
   const response = await authorizedFetch("/api/v1/conversations");
   if (!response.ok) throw new Error("Could not load your conversations.");
-  const payload = await response.json();
-  return payload.conversations ?? [];
+
+  const payload: unknown = await response.json();
+  if (
+    typeof payload !== "object" ||
+    payload === null ||
+    !("conversations" in payload) ||
+    !Array.isArray(payload.conversations)
+  ) {
+    return [];
+  }
+
+  return payload.conversations as Conversation[];
 }
 
 export async function getConversationMessages(conversationId: string): Promise<StoredMessage[]> {
-  const response = await authorizedFetch("/api/v1/conversations/" + encodeURIComponent(conversationId) + "/messages");
+  const response = await authorizedFetch(
+    "/api/v1/conversations/" + encodeURIComponent(conversationId) + "/messages",
+  );
   if (!response.ok) throw new Error("Could not load this conversation.");
-  const payload = await response.json();
-  return payload.messages ?? [];
+
+  const payload: unknown = await response.json();
+  if (
+    typeof payload !== "object" ||
+    payload === null ||
+    !("messages" in payload) ||
+    !Array.isArray(payload.messages)
+  ) {
+    return [];
+  }
+
+  return payload.messages as StoredMessage[];
 }
 
 export async function deleteConversation(conversationId: string): Promise<void> {
