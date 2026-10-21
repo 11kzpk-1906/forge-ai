@@ -70,7 +70,21 @@ export async function listMemories(query = ""): Promise<MemoryItem[]> {
   return Array.isArray(payload.memories) ? payload.memories : [];
 }
 
-export async function createMemory(input: { title: string; content: string; tags: string[] }): Promise<MemoryItem> {
+export interface MemoryDraft {
+  title: string;
+  content: string;
+  tags: string[];
+}
+
+export async function suggestMemories(conversationId: string): Promise<MemoryDraft[]> {
+  const payload = await request<{ suggestions: MemoryDraft[] }>("/suggestions", {
+    method: "POST",
+    body: JSON.stringify({ conversation_id: conversationId }),
+  });
+  return Array.isArray(payload.suggestions) ? payload.suggestions : [];
+}
+
+export async function createMemory(input: MemoryDraft & { source_conversation_id?: string | null }): Promise<MemoryItem> {
   const payload = await request<MemoryResponse>("", {
     method: "POST",
     body: JSON.stringify(input),
