@@ -1342,3 +1342,9 @@ button:disabled { cursor: not-allowed; }
 .theme-light .memory-search input::placeholder,
 .theme-light .memory-editor input::placeholder,
 .theme-light .memory-editor textarea::placeholder { color: #9a8eaa; }
+
+.memory-tag-limit { display: block; margin-top: 5px; color: #8c829e; font-size: 10px; font-weight: 400; }
+.memory-tag-limit-error { color: #f0a0b3; }
+.memory-editor input[aria-invalid="true"] { border-color: #cf718b; }
+.theme-light .memory-tag-limit { color: #786d88; }
+.theme-light .memory-tag-limit-error { color: #b4234d; }
