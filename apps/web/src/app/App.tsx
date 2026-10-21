@@ -597,11 +597,15 @@ function App() {
           <div className="workspace-title">
             <span className="workspace-title-mark">/</span>
             <strong>
-              {messages.length > 0
-                ? conversations.find(
-                    (item) => item.id === activeConversationId,
-                  )?.title ?? "New chat"
-                : "New chat"}
+              {showMemory
+                ? "Memory vault"
+                : showSettings
+                  ? "Settings"
+                  : messages.length > 0
+                    ? conversations.find(
+                        (item) => item.id === activeConversationId,
+                      )?.title ?? "New chat"
+                    : "New chat"}
             </strong>
           </div>
 
