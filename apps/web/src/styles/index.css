@@ -1311,3 +1311,34 @@ button:disabled { cursor: not-allowed; }
   .memory-card-actions { gap: 4px; }
   .memory-editor { padding: 14px; }
 }
+
+
+.memory-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
+}
+.theme-light .memory-heading h1 { color: #211b2b; }
+.theme-light .memory-heading p,
+.theme-light .memory-card-content,
+.theme-light .memory-empty p { color: #746b82; }
+.theme-light .memory-search,
+.theme-light .memory-editor,
+.theme-light .memory-card,
+.theme-light .memory-empty {
+  background: rgba(255,255,255,.94);
+  border-color: #e3d9ef;
+}
+.theme-light .memory-search input,
+.theme-light .memory-editor input,
+.theme-light .memory-editor textarea,
+.theme-light .memory-card-copy h2,
+.theme-light .memory-empty strong { color: #2a2234; }
+.theme-light .memory-editor input,
+.theme-light .memory-editor textarea { background: #fbf9ff; border-color: #ded3eb; }
+.theme-light .memory-secondary-button,
+.theme-light .memory-card-actions button { background: #f5f0fc; border-color: #e1d6ef; color: #6e5b88; }
+.theme-light .memory-search { background: #fff; }
+.theme-light .memory-search input::placeholder,
+.theme-light .memory-editor input::placeholder,
+.theme-light .memory-editor textarea::placeholder { color: #9a8eaa; }
