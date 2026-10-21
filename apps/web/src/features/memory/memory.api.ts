@@ -28,7 +28,6 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     headers: {
       "Content-Type": "application/json",
       Authorization: "Bearer " + session.access_token,
-      ...init.headers,
     },
   });
 
@@ -51,7 +50,8 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 export async function listMemories(query = ""): Promise<MemoryItem[]> {
   const params = new URLSearchParams();
   if (query.trim().length >= 2) params.set("query", query.trim());
-  const suffix = params.size ? "?" + params.toString() : "";
+  const encoded = params.toString();
+  const suffix = encoded ? "?" + encoded : "";
   const payload = await request<MemoryListResponse>(suffix);
   return Array.isArray(payload.memories) ? payload.memories : [];
 }
