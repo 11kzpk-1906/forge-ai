@@ -38,11 +38,12 @@ async def suggest_memories(
         database.table("messages")
         .select("role, content")
         .eq("conversation_id", request.conversation_id)
-        .order("created_at", desc=False)
+        .order("created_at", desc=True)
         .limit(30)
         .execute()
     )
-    rows = response.data or []
+    # Fetch the most recent messages, then restore chronological order for the prompt.
+    rows = list(reversed(response.data or []))
     transcript = "\n".join(
         f"{str(row.get('role', '')).upper()}: {str(row.get('content', ''))[:4000]}"
         for row in rows
