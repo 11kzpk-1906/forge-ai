@@ -47,24 +47,34 @@ async def list_memories(
     current_user=Depends(get_current_user),
 ):
     user_id = _user_id(current_user)
-    base = database.table("memory_items").select(
-        "id, title, content, tags, source_conversation_id, created_at, updated_at"
-    ).eq("user_id", user_id)
+    base = (
+        database.table("memory_items")
+        .select(
+            "id, title, content, tags, source_conversation_id, created_at, updated_at"
+        )
+        .eq("user_id", user_id)
+    )
 
     if query and query.strip():
         term = query.strip()
-        title_rows = (
+        columns = (
             database.table("memory_items")
-            .select("id, title, content, tags, source_conversation_id, created_at, updated_at")
+            .select(
+                "id, title, content, tags, source_conversation_id, created_at, updated_at"
+            )
             .eq("user_id", user_id)
-            .ilike("title", f"%{term}%")
+        )
+        title_rows = (
+            columns.ilike("title", f"%{term}%")
             .order("updated_at", desc=True)
             .limit(limit)
             .execute()
         )
         content_rows = (
             database.table("memory_items")
-            .select("id, title, content, tags, source_conversation_id, created_at, updated_at")
+            .select(
+                "id, title, content, tags, source_conversation_id, created_at, updated_at"
+            )
             .eq("user_id", user_id)
             .ilike("content", f"%{term}%")
             .order("updated_at", desc=True)
@@ -97,6 +107,21 @@ async def create_memory(
     if not title or not content:
         raise HTTPException(status_code=422, detail="Title and content cannot be blank.")
 
+    if request.source_conversation_id:
+        source = (
+            database.table("conversations")
+            .select("id")
+            .eq("id", request.source_conversation_id)
+            .eq("user_id", user_id)
+            .limit(1)
+            .execute()
+        )
+        if not source.data:
+            raise HTTPException(
+                status_code=404,
+                detail="Source conversation not found.",
+            )
+
     payload = {
         "user_id": user_id,
         "title": title,
@@ -107,7 +132,9 @@ async def create_memory(
     response = (
         database.table("memory_items")
         .insert(payload)
-        .select("id, title, content, tags, source_conversation_id, created_at, updated_at")
+        .select(
+            "id, title, content, tags, source_conversation_id, created_at, updated_at"
+        )
         .execute()
     )
     if not response.data:
@@ -132,7 +159,9 @@ async def update_memory(
         payload["content"] = payload["content"].strip()
         if not payload["content"]:
             raise HTTPException(status_code=422, detail="Content cannot be blank.")
-    if "tags" in payload and payload["tags"] is not None:
+    if "tags" in payload:
+        if payload["tags"] is None:
+            raise HTTPException(status_code=422, detail="Tags must be a list.")
         payload["tags"] = _normalize_tags(payload["tags"])
     payload["updated_at"] = datetime.now(timezone.utc).isoformat()
 
@@ -141,7 +170,9 @@ async def update_memory(
         .update(payload)
         .eq("id", memory_id)
         .eq("user_id", _user_id(current_user))
-        .select("id, title, content, tags, source_conversation_id, created_at, updated_at")
+        .select(
+            "id, title, content, tags, source_conversation_id, created_at, updated_at"
+        )
         .execute()
     )
     if not response.data:
