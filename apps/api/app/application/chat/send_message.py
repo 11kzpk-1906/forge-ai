@@ -4,6 +4,7 @@ from collections.abc import AsyncIterator, Sequence
 from dataclasses import dataclass
 
 from app.application.chat.context_manager import build_chat_context
+from app.application.chat.memory_context import retrieve_memory_context
 from app.application.chat.prompt_engine import build_prompt
 from app.application.chat.response_policy import choose_response_policy
 from app.infrastructure.ai.base import (
@@ -47,7 +48,7 @@ class SendMessageService:
 
         API request
             ↓
-        Context Manager
+        Context Manager + Saved Memory Retrieval
             ↓
         Prompt Engine
             ↓
@@ -90,6 +91,13 @@ class SendMessageService:
             f"RESPONSE POLICY ({policy.name.upper()}):\n"
             f"{policy.instructions}"
         )
+
+        memory_context = retrieve_memory_context(
+            command.user_id,
+            last_user_message,
+        )
+        if memory_context:
+            system_prompt = f"{system_prompt}\n\n{memory_context}"
 
         ai_messages = [
             AIMessage(
