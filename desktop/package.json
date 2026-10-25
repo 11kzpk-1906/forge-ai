@@ -9,7 +9,7 @@
     "dist:win": "npm run build:desktop"
   },
   "devDependencies": {
-    "electron": "^41.10.6",
+    "electron": "^42.11.16",
     "electron-builder": "^26.15.3"
   },
   "build": {
