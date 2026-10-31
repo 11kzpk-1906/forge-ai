@@ -11,7 +11,9 @@ logger = logging.getLogger(__name__)
 
 TAVILY_ENDPOINT = "https://api.tavily.com/search"
 MAX_RESULTS = 5
+RESEARCH_MAX_RESULTS = 8
 MAX_CONTENT_CHARS = 1200
+RESEARCH_MAX_CONTENT_CHARS = 1800
 
 
 def should_search_web(query: str) -> bool:
@@ -27,18 +29,24 @@ def should_search_web(query: str) -> bool:
     return any(signal in text for signal in signals)
 
 
-async def search_web(query: str) -> list[dict[str, str]]:
+async def search_web(
+    query: str,
+    *,
+    research_mode: bool = False,
+) -> list[dict[str, str]]:
     """Search the live web through Tavily. Missing configuration is non-fatal."""
     api_key = settings.tavily_api_key
     if not api_key or not query.strip():
         return []
 
+    result_limit = RESEARCH_MAX_RESULTS if research_mode else MAX_RESULTS
+    content_limit = RESEARCH_MAX_CONTENT_CHARS if research_mode else MAX_CONTENT_CHARS
     payload: dict[str, Any] = {
         "api_key": api_key,
         "query": query[:500],
-        "search_depth": "basic",
+        "search_depth": "advanced" if research_mode else "basic",
         "topic": "general",
-        "max_results": MAX_RESULTS,
+        "max_results": result_limit,
         "include_answer": False,
         "include_raw_content": False,
     }
@@ -50,7 +58,7 @@ async def search_web(query: str) -> list[dict[str, str]]:
             data = response.json()
 
         results: list[dict[str, str]] = []
-        for item in data.get("results", [])[:MAX_RESULTS]:
+        for item in data.get("results", [])[:result_limit]:
             title = str(item.get("title") or "Untitled result").strip()
             url = str(item.get("url") or "").strip()
             content = " ".join(str(item.get("content") or "").split())
@@ -59,7 +67,7 @@ async def search_web(query: str) -> list[dict[str, str]]:
             results.append({
                 "title": title[:240],
                 "url": url[:1000],
-                "content": content[:MAX_CONTENT_CHARS],
+                "content": content[:content_limit],
             })
         return results
     except Exception:
