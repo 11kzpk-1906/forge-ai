@@ -106,7 +106,16 @@ class SendMessageService:
 
         # If the user includes a GitHub repository URL, load a bounded public
         # snapshot so answers can be grounded in the actual project structure.
-        repository_url = extract_github_url(last_user_message)
+        repository_url = next(
+            (
+                url
+                for message in reversed(command.messages)
+                if message.role == "user"
+                for url in [extract_github_url(message.content)]
+                if url
+            ),
+            None,
+        )
         if repository_url:
             project_context = await fetch_project_context(repository_url)
             if project_context:
