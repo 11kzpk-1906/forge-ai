@@ -1,5 +1,5 @@
-import { supabase } from "../../../lib/supabase";
-import { getApiBaseUrl } from "../../../lib/api-url";
+import { supabase } from "../../lib/supabase";
+import { getApiBaseUrl } from "../../lib/api-url";
 
 export interface MemoryItem {
   id: string;
