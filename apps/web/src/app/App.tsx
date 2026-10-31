@@ -19,7 +19,8 @@ type Mode =
   | "Implement"
   | "Test"
   | "Security"
-  | "DevOps";
+  | "DevOps"
+  | "Research";
 
 const personalities = [
   { id: "friendly_engineer", label: "Friendly Engineer", description: "Warm, practical, and conversational" },
@@ -41,6 +42,7 @@ const modes: Mode[] = [
   "Test",
   "Security",
   "DevOps",
+  "Research",
 ];
 
 const starterCards: Array<{
@@ -82,47 +84,80 @@ function modeLabel(mode: Mode) {
   return mode.toUpperCase() + " MODE";
 }
 
-function renderMessageContent(content: string, onCopyCode: (code: string, id: string) => void, copiedCode: string | null) {
-  const parts = content.split(/(```[^\n]*\n[\s\S]*?```)/g);
+function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
+  const pattern = /(\*\*[^*]+\*\*|~~[^~]+~~|\*[^*]+\*|_[^_]+_|\x60[^\x60]+\x60|\[[^\]]+\]\(https?:\/\/[^\s)]+\))/g;
+  return text.split(pattern).map((token, index) => {
+    const key = keyPrefix + "-" + index;
+    if (token.startsWith("**") && token.endsWith("**")) return <strong key={key}>{token.slice(2, -2)}</strong>;
+    if (token.startsWith("~~") && token.endsWith("~~")) return <del key={key}>{token.slice(2, -2)}</del>;
+    if ((token.startsWith("*") && token.endsWith("*")) || (token.startsWith("_") && token.endsWith("_"))) return <em key={key}>{token.slice(1, -1)}</em>;
+    if (token.startsWith("`") && token.endsWith("`")) return <code className="inline-code" key={key}>{token.slice(1, -1)}</code>;
+    if (token.startsWith("[") && token.includes("](")) {
+      const match = token.match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/);
+      if (match) return <a key={key} href={match[2]} target="_blank" rel="noreferrer noopener">{match[1]}</a>;
+    }
+    return <React.Fragment key={key}>{token}</React.Fragment>;
+  });
+}
 
-  return parts.map((part, index) => {
-    if (part.startsWith("```") && part.endsWith("```")) {
-      const lines = part.slice(3, -3).replace(/^\r?\n/, "").split(/\r?\n/);
+function renderMessageContent(content: string, onCopyCode: (code: string, id: string) => void, copiedCode: string | null) {
+  const blocks = content.split(/(```[^\n]*\n[\s\S]*?```)/g);
+  return blocks.map((block, blockIndex) => {
+    if (block.startsWith("```") && block.endsWith("```")) {
+      const lines = block.slice(3, -3).replace(/^\r?\n/, "").split(/\r?\n/);
       const language = lines.shift()?.trim() || "code";
       const code = lines.join("\n").replace(/\n$/, "");
-      const codeId = index + "-" + code.slice(0, 40);
-      return (
-        <div className="code-block" key={index}>
-          <div className="code-block-header">
-            <div className="code-file-tab">
-              <span className="code-file-dot" />
-              <span>{language || "Code"}</span>
-            </div>
-            <button className="code-copy-button" onClick={() => onCopyCode(code, codeId)}>
-              {copiedCode === codeId ? "Copied" : "Copy"}
-            </button>
-          </div>
-          <div className="code-editor">
-            <div className="code-line-numbers" aria-hidden="true">
-              {code.split("\n").map((_, lineIndex) => (
-                <span key={lineIndex}>{lineIndex + 1}</span>
-              ))}
-            </div>
-            <pre><code>{code}</code></pre>
-          </div>
+      const codeId = blockIndex + "-" + code.slice(0, 40);
+      return <div className="code-block" key={blockIndex}>
+        <div className="code-block-header"><div className="code-file-tab"><span className="code-file-dot" /><span>{language}</span></div>
+          <button className="code-copy-button" onClick={() => onCopyCode(code, codeId)}>{copiedCode === codeId ? "Copied" : "Copy"}</button>
         </div>
-      );
+        <div className="code-editor"><div className="code-line-numbers" aria-hidden="true">{code.split("\n").map((_, i) => <span key={i}>{i + 1}</span>)}</div><pre><code>{code}</code></pre></div>
+      </div>;
     }
-    const chunks = part.split(/(`[^`]+`)/g);
-    return (
-      <React.Fragment key={index}>
-        {chunks.map((chunk, chunkIndex) =>
-          chunk.startsWith("`") && chunk.endsWith("`")
-            ? <code className="inline-code" key={chunkIndex}>{chunk.slice(1, -1)}</code>
-            : <React.Fragment key={chunkIndex}>{chunk}</React.Fragment>
-        )}
-      </React.Fragment>
-    );
+    const lines = block.replace(/\r/g, "").split("\n");
+    const output: React.ReactNode[] = [];
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i];
+      if (!line.trim()) { i++; continue; }
+      const heading = line.match(/^(#{1,4})\s+(.+)$/);
+      if (heading) {
+        const level = heading[1].length;
+        const Tag = ("h" + level) as React.ElementType;
+        output.push(<Tag className={"rich-heading rich-heading-" + level} key={blockIndex + "-h-" + i}>{renderInline(heading[2], blockIndex + "-h-" + i)}</Tag>);
+        i++; continue;
+      }
+      if (/^\s*(---+|\*\*\*+)\s*$/.test(line)) { output.push(<hr className="rich-divider" key={blockIndex + "-hr-" + i} />); i++; continue; }
+      if (/^>\s?/.test(line)) {
+        const quote: string[] = [];
+        while (i < lines.length && /^>\s?/.test(lines[i])) quote.push(lines[i++].replace(/^>\s?/, ""));
+        output.push(<blockquote className="rich-quote" key={blockIndex + "-q-" + i}>{quote.map((q,j)=><p key={j}>{renderInline(q, blockIndex + "-q-" + i + "-" + j)}</p>)}</blockquote>);
+        continue;
+      }
+      if (/^\s*[-*+]\s+/.test(line) || /^\s*\d+[.)]\s+/.test(line)) {
+        const ordered = /^\s*\d+[.)]\s+/.test(line);
+        const items: string[] = [];
+        const matcher = ordered ? /^\s*\d+[.)]\s+/ : /^\s*[-*+]\s+/;
+        while (i < lines.length && matcher.test(lines[i])) items.push(lines[i++].replace(matcher, ""));
+        const List = ordered ? "ol" : "ul";
+        output.push(<List className="rich-list" key={blockIndex + "-list-" + i}>{items.map((item,j)=><li key={j}>{renderInline(item, blockIndex + "-li-" + i + "-" + j)}</li>)}</List>);
+        continue;
+      }
+      if (line.includes("|") && i + 1 < lines.length && /^\s*\|?\s*:?-{3,}/.test(lines[i + 1])) {
+        const cells = (value: string) => value.trim().replace(/^\||\|$/g, "").split("|").map(cell=>cell.trim());
+        const headers = cells(line); i += 2;
+        const rows: string[][] = [];
+        while (i < lines.length && lines[i].includes("|") && lines[i].trim()) rows.push(cells(lines[i++]));
+        output.push(<div className="rich-table-wrap" key={blockIndex + "-table-" + i}><table className="rich-table"><thead><tr>{headers.map((cell,j)=><th key={j}>{renderInline(cell, "th"+j)}</th>)}</tr></thead><tbody>{rows.map((row,j)=><tr key={j}>{headers.map((_,k)=><td key={k}>{renderInline(row[k] || "", "td"+j+"-"+k)}</td>)}</tr>)}</tbody></table></div>);
+        continue;
+      }
+      const paragraph: string[] = [line];
+      i++;
+      while (i < lines.length && lines[i].trim() && !/^(#{1,4})\s+/.test(lines[i]) && !/^\s*(---+|\*\*\*+)\s*$/.test(lines[i]) && !/^>\s?/.test(lines[i]) && !/^\s*[-*+]\s+/.test(lines[i]) && !/^\s*\d+[.)]\s+/.test(lines[i])) paragraph.push(lines[i++]);
+      output.push(<p className="rich-paragraph" key={blockIndex + "-p-" + i}>{renderInline(paragraph.join(" "), blockIndex + "-p-" + i)}</p>);
+    }
+    return <React.Fragment key={blockIndex}>{output}</React.Fragment>;
   });
 }
 
@@ -918,10 +953,10 @@ function App() {
             </div>
 
             <div className="composer-tags">
-              <button className="composer-tag active" onClick={() => setMode("Explain")}>Adaptive</button>
-              <button className="composer-tag" onClick={() => setMode("Architect")}>Think</button>
-              <button className="composer-tag" disabled>Research</button>
-              <button className="composer-tag" onClick={() => setMode("Implement")}>Create</button>
+              <button className={mode === "Explain" ? "composer-tag active" : "composer-tag"} onClick={() => setMode("Explain")}>Adaptive</button>
+              <button className={mode === "Architect" ? "composer-tag active" : "composer-tag"} onClick={() => setMode("Architect")}>Think</button>
+              <button className={mode === "Research" ? "composer-tag active" : "composer-tag"} onClick={() => setMode("Research")} aria-pressed={mode === "Research"}>Research</button>
+              <button className={mode === "Implement" ? "composer-tag active" : "composer-tag"} onClick={() => setMode("Implement")}>Create</button>
             </div>
             <p className="composer-disclaimer">
               ForgeAI can make mistakes. Check important information. <span>?</span>

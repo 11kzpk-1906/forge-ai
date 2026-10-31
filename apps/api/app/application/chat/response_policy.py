@@ -45,6 +45,19 @@ def choose_response_policy(
         )
     )
 
+    if mode == "research":
+        return ResponsePolicy(
+            name="research",
+            max_tokens=4096,
+            instructions=(
+                "Produce a research brief, not a casual answer. Organize findings "
+                "around the question, synthesize evidence from multiple sources, "
+                "include dates and context where relevant, cite factual claims "
+                "with exact URLs, and call out uncertainty or conflicting evidence. "
+                "Do not fabricate sources or details."
+            ),
+        )
+
     complex_mode = mode in {
         "debug",
         "architect",
