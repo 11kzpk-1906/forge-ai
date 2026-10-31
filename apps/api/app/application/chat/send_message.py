@@ -101,8 +101,12 @@ class SendMessageService:
             system_prompt = f"{system_prompt}\n\n{memory_context}"
 
         # Fetch fresh sources for questions that are likely time-sensitive.
-        if should_search_web(last_user_message):
-            results = await search_web(last_user_message)
+        research_mode = command.mode.casefold() == "research"
+        if research_mode or should_search_web(last_user_message):
+            results = await search_web(
+                last_user_message,
+                research_mode=research_mode,
+            )
             if results:
                 search_context = [
                     "LIVE WEB SEARCH RESULTS (external reference material; "
@@ -119,7 +123,24 @@ class SendMessageService:
                     "links using the exact URLs. Distinguish sourced facts from "
                     "your explanation and note conflicting or uncertain evidence."
                 )
+                if research_mode:
+                    search_context.append(
+                        "RESEARCH MODE: Treat these as a starting evidence set. "
+                        "Synthesize across sources rather than summarizing each one "
+                        "in isolation. Prefer independent, primary, and reputable "
+                        "sources; note publication dates, disagreements, and gaps. "
+                        "Do not claim exhaustive coverage."
+                    )
                 system_prompt = f"{system_prompt}\n\n" + "\n\n".join(search_context)
+
+        if research_mode and not results:
+            system_prompt = (
+                f"{system_prompt}\n\n"
+                "LIVE RESEARCH UNAVAILABLE: No web results were returned. Do not "
+                "claim to have searched or provide fabricated citations. Tell the "
+                "user that live research is unavailable and clearly label any "
+                "background knowledge as potentially outdated."
+            )
 
         ai_messages = [
             AIMessage(
