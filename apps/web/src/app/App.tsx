@@ -124,7 +124,7 @@ function renderMessageContent(content: string, onCopyCode: (code: string, id: st
       const heading = line.match(/^(#{1,4})\s+(.+)$/);
       if (heading) {
         const level = heading[1].length;
-        const Tag = ("h" + level) as keyof JSX.IntrinsicElements;
+        const Tag = ("h" + level) as React.ElementType;
         output.push(<Tag className={"rich-heading rich-heading-" + level} key={blockIndex + "-h-" + i}>{renderInline(heading[2], blockIndex + "-h-" + i)}</Tag>);
         i++; continue;
       }
