@@ -192,6 +192,7 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showMemory, setShowMemory] = useState(false);
   const [showProjects, setShowProjects] = useState(false);
+  const [contextDockOpen, setContextDockOpen] = useState(true);
   const [showAllModes, setShowAllModes] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
@@ -711,6 +712,15 @@ function App() {
               Demo mode
             </span>
             <button
+              className={contextDockOpen ? "header-icon-button context-dock-trigger active" : "header-icon-button context-dock-trigger"}
+              title={contextDockOpen ? "Hide context dock" : "Show context dock"}
+              aria-label={contextDockOpen ? "Hide context dock" : "Show context dock"}
+              aria-expanded={contextDockOpen}
+              onClick={() => setContextDockOpen((open) => !open)}
+            >
+              ◫
+            </button>
+            <button
               className="header-icon-button"
               title="New chat"
               onClick={handleNewChat}
@@ -773,6 +783,7 @@ function App() {
           </div>
         )}
 
+        <div className={contextDockOpen && !showSettings && !showMemory && !showProjects ? "workspace-content-with-dock" : "workspace-content"}>
         {showProjects ? (
           <ProjectsPanel
             userKey={user?.id ?? user?.email ?? "local"}
@@ -1061,6 +1072,41 @@ function App() {
               ForgeAI can make mistakes. Check important information. <span>?</span>
             </p>
           </section>
+        )}
+        </div>
+        {contextDockOpen && !showSettings && !showMemory && !showProjects && (
+          <aside className="context-dock" aria-label="Conversation context">
+            <div className="context-dock-heading">
+              <div><span className="context-eyebrow">LIVE WORKSPACE</span><h2>Context dock</h2></div>
+              <button type="button" aria-label="Close context dock" onClick={() => setContextDockOpen(false)}>×</button>
+            </div>
+            <div className="context-live-card">
+              <div className="context-live-top"><span className={isStreaming ? "context-live-indicator working" : "context-live-indicator"} />{isStreaming ? "PROCESSING" : "READY"}</div>
+              <strong>{messages.length ? "Conversation active" : "Workspace ready"}</strong>
+              <p>{messages.length ? "ForgeAI is working with the current conversation." : "Start a conversation to build context as you work."}</p>
+            </div>
+            <section className="context-section">
+              <div className="context-section-title"><span>⌘</span> SESSION</div>
+              <div className="context-detail-row"><span>Engineering mode</span><strong>{mode}</strong></div>
+              <div className="context-detail-row"><span>Personality</span><strong>{personalities.find((item) => item.id === personality)?.label ?? "Engineer"}</strong></div>
+              <div className="context-detail-row"><span>Messages</span><strong>{messages.length}</strong></div>
+              <div className="context-detail-row"><span>Conversation</span><strong>{activeConversationId ? "Saved" : "New session"}</strong></div>
+            </section>
+            <section className="context-section">
+              <div className="context-section-title"><span>◇</span> KNOWLEDGE</div>
+              <button className="context-action-row" onClick={() => { setShowMemory(true); setShowSettings(false); setShowProjects(false); }}><span><strong>Memory vault</strong><small>Review saved facts and preferences</small></span><b>↗</b></button>
+              <button className="context-action-row" onClick={() => { setShowProjects(true); setShowMemory(false); setShowSettings(false); }}><span><strong>Project workspaces</strong><small>Open project notes and tasks</small></span><b>↗</b></button>
+            </section>
+            <section className="context-section">
+              <div className="context-section-title"><span>✧</span> QUICK MODES</div>
+              <div className="context-mode-grid">
+                {(["Explain","Debug","Architect","Review","Implement","Research"] as Mode[]).map((item) => (
+                  <button key={item} className={mode === item ? "context-mode-chip active" : "context-mode-chip"} onClick={() => setMode(item)} disabled={isStreaming}>{item}</button>
+                ))}
+              </div>
+            </section>
+            <div className="context-dock-foot"><span>✦</span><span>Context updates as your session evolves.</span></div>
+          </aside>
         )}
       </main>
     </div>
