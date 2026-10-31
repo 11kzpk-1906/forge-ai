@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 const logoUrl = new URL("../assets/logo.svg", import.meta.url).href;
 import { ParticleField } from "../components/ParticleField";
+import { ThinkingTimeline } from "../components/ThinkingTimeline";
 import { useAuth } from "./providers/AuthProvider";
 import { useChat } from "../features/chat/hooks/useChat";
 import { MemoryPanel } from "../features/memory/MemoryPanel";
@@ -934,7 +935,7 @@ function App() {
                       {item.content
                         ? renderMessageContent(item.content, handleCopyCode, copiedCode)
                         : isStreaming && isLastMessage
-                          ? <span className="thinking">ForgeAI is thinking…</span>
+                          ? <ThinkingTimeline />
                           : null}
                     </div>
                     {item.content && (
