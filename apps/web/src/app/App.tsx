@@ -19,7 +19,8 @@ type Mode =
   | "Implement"
   | "Test"
   | "Security"
-  | "DevOps";
+  | "DevOps"
+  | "Research";
 
 const personalities = [
   { id: "friendly_engineer", label: "Friendly Engineer", description: "Warm, practical, and conversational" },
@@ -41,6 +42,7 @@ const modes: Mode[] = [
   "Test",
   "Security",
   "DevOps",
+  "Research",
 ];
 
 const starterCards: Array<{
@@ -918,10 +920,10 @@ function App() {
             </div>
 
             <div className="composer-tags">
-              <button className="composer-tag active" onClick={() => setMode("Explain")}>Adaptive</button>
-              <button className="composer-tag" onClick={() => setMode("Architect")}>Think</button>
-              <button className="composer-tag" disabled>Research</button>
-              <button className="composer-tag" onClick={() => setMode("Implement")}>Create</button>
+              <button className={mode === "Explain" ? "composer-tag active" : "composer-tag"} onClick={() => setMode("Explain")}>Adaptive</button>
+              <button className={mode === "Architect" ? "composer-tag active" : "composer-tag"} onClick={() => setMode("Architect")}>Think</button>
+              <button className={mode === "Research" ? "composer-tag active" : "composer-tag"} onClick={() => setMode("Research")} aria-pressed={mode === "Research"}>Research</button>
+              <button className={mode === "Implement" ? "composer-tag active" : "composer-tag"} onClick={() => setMode("Implement")}>Create</button>
             </div>
             <p className="composer-disclaimer">
               ForgeAI can make mistakes. Check important information. <span>?</span>
