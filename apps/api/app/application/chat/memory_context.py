@@ -44,15 +44,15 @@ _CORE_TITLE_PATTERNS = (
 _INTENT_PATTERNS: tuple[tuple[re.Pattern[str], tuple[str, ...]], ...] = (
     (
         re.compile(
-            r"\\b(who am i|about me|about myself|my profile|my background|"
-            r"my interests|my goals|what do you know about me)\\b"
+            r"\b(who am i|about me|about myself|my profile|my background|"
+            r"my interests|my goals|what do you know about me)\b"
         ),
         ("profile", "identity", "background", "interests", "goals"),
     ),
     (
         re.compile(
-            r"\\b(projects?|building|working on|developing|coding|"
-            r"repositories|repos|apps|websites)\\b"
+            r"\b(projects?|building|working on|developing|coding|"
+            r"repositories|repos|apps|websites)\b"
         ),
         (
             "project", "building", "developing", "working", "repository",
@@ -61,8 +61,8 @@ _INTENT_PATTERNS: tuple[tuple[re.Pattern[str], tuple[str, ...]], ...] = (
     ),
     (
         re.compile(
-            r"\\b(education|school|class|grade|study|studying|college|"
-            r"university|degree|exam|course)\\b"
+            r"\b(education|school|class|grade|study|studying|college|"
+            r"university|degree|exam|course)\b"
         ),
         (
             "education", "school", "class", "grade", "study", "studying",
@@ -71,13 +71,13 @@ _INTENT_PATTERNS: tuple[tuple[re.Pattern[str], tuple[str, ...]], ...] = (
     ),
     (
         re.compile(
-            r"\\b(career|job|profession|future|work goals|career goals)\\b"
+            r"\b(career|job|profession|future|work goals|career goals)\b"
         ),
         ("career", "job", "profession", "future", "goal", "software engineer"),
     ),
     (
         re.compile(
-            r"\\b(preferences?|prefer|favourite|favorite|likes?|style)\\b"
+            r"\b(preferences?|prefer|favourite|favorite|likes?|style)\b"
         ),
         ("preference", "prefer", "favorite", "likes", "style"),
     ),
