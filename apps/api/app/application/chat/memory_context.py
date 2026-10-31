@@ -52,6 +52,46 @@ def _terms(text: str) -> list[str]:
     return result
 
 
+# Preserve these helpers as part of the memory retrieval module's public
+# internal API; tests and retrieval logic use them for broad questions.
+_INTENT_PATTERNS: tuple[tuple[re.Pattern[str], tuple[str, ...]], ...] = (
+    (re.compile(r"\b(who am i|about me|about myself|my profile|my background|my interests|my goals|what do you know about me)\b"), ("profile", "identity", "background", "interests", "goals")),
+    (re.compile(r"\b(projects?|building|working on|developing|coding|repositories|repos|apps|websites)\b"), ("project", "building", "developing", "working", "repository", "repo", "codebase", "application", "app", "website", "software")),
+    (re.compile(r"\b(education|school|class|grade|study|studying|college|university|degree|exam|course)\b"), ("education", "school", "class", "grade", "study", "studying", "college", "university", "degree", "course", "subject")),
+    (re.compile(r"\b(career|job|profession|future|work goals|career goals)\b"), ("career", "job", "profession", "future", "goal", "software engineer")),
+    (re.compile(r"\b(preferences?|prefer|favourite|favorite|likes?|style)\b"), ("preference", "prefer", "favorite", "likes", "style")),
+)
+
+
+def _expand_query_terms(message: str) -> list[str]:
+    """Expand broad personal-context questions into saved-memory vocabulary."""
+    normalized = " ".join((message or "").casefold().split())
+    expanded = _terms(normalized)
+    for pattern, aliases in _INTENT_PATTERNS:
+        if pattern.search(normalized):
+            for alias in aliases:
+                for term in _terms(alias):
+                    if term not in expanded:
+                        expanded.append(term)
+    return expanded[:32]
+
+
+def _relevance_score(item: dict, query_terms: list[str]) -> float:
+    """Score a saved memory against expanded query terms."""
+    title = str(item.get("title") or "").casefold()
+    content = str(item.get("content") or "").casefold()
+    tags = " ".join(str(tag) for tag in (item.get("tags") or [])).casefold()
+    score = 0.0
+    for term in query_terms:
+        if term in title:
+            score += 6.0
+        if term in tags:
+            score += 5.0
+        if term in content:
+            score += 1.0
+    return score
+
+
 def _is_core_memory(item: dict) -> bool:
     """Identify profile notes that should accompany every chat."""
     tags = {
