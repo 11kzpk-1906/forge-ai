@@ -2940,3 +2940,54 @@ button:disabled { cursor: not-allowed; }
 @media (prefers-reduced-motion:reduce) {
   .theme-dark *, .theme-dark *::before, .theme-dark *::after { scroll-behavior:auto !important; }
 }
+
+
+/* Lavender Studio — live context dock */
+.workspace-content-with-dock { min-width:0; flex:1; display:flex; flex-direction:column; }
+.workspace-content { min-width:0; flex:1; display:flex; flex-direction:column; }
+.workspace:has(.context-dock) { position:relative; }
+.workspace:has(.context-dock) > .workspace-content-with-dock { width:calc(100% - 286px); }
+.context-dock {
+  position:absolute; z-index:8; top:76px; right:18px; bottom:18px; width:260px;
+  overflow:auto; padding:18px 15px; border:1px solid rgba(194,169,255,.16);
+  border-radius:18px; background:linear-gradient(165deg,rgba(35,27,51,.96),rgba(20,17,31,.97));
+  box-shadow:0 18px 55px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.035);
+  backdrop-filter:blur(22px); color:#eee7fa; animation:contextDockIn .22s ease-out;
+}
+@keyframes contextDockIn { from { opacity:0; transform:translateX(9px); } to { opacity:1; transform:translateX(0); } }
+.context-dock-heading { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:17px; }
+.context-eyebrow { color:#a994cf; font-size:9px; font-weight:800; letter-spacing:.16em; }
+.context-dock-heading h2 { margin:5px 0 0; font-size:17px; letter-spacing:-.035em; }
+.context-dock-heading > button { width:27px; height:27px; border:1px solid rgba(198,171,255,.14); border-radius:8px; background:rgba(255,255,255,.035); color:#bba8d8; cursor:pointer; font-size:17px; }
+.context-live-card { padding:13px; border:1px solid rgba(190,160,255,.15); border-radius:13px; background:radial-gradient(ellipse at 90% 0,rgba(160,120,230,.16),transparent 65%),rgba(255,255,255,.025); }
+.context-live-top { display:flex; align-items:center; gap:7px; color:#bca8dc; font-size:9px; font-weight:800; letter-spacing:.12em; }
+.context-live-indicator { width:7px; height:7px; border-radius:50%; background:#a88be5; box-shadow:0 0 10px rgba(168,139,229,.7); }
+.context-live-indicator.working { background:#d5b6ff; animation:contextPulse 1.1s infinite; }
+@keyframes contextPulse { 50% { opacity:.35; box-shadow:0 0 2px rgba(213,182,255,.3); } }
+.context-live-card > strong { display:block; margin-top:12px; font-size:13px; }
+.context-live-card p { margin:5px 0 0; color:#a99db9; font-size:11px; line-height:1.55; }
+.context-section { padding:17px 1px 13px; border-bottom:1px solid rgba(190,160,255,.10); }
+.context-section-title { display:flex; align-items:center; gap:8px; margin-bottom:12px; color:#bca8dc; font-size:9px; font-weight:800; letter-spacing:.14em; }
+.context-section-title > span { color:#c6adff; font-size:14px; }
+.context-detail-row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:7px 0; }
+.context-detail-row > span { color:#a99db9; font-size:10px; }
+.context-detail-row > strong { max-width:125px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#e7ddf5; font-size:10px; font-weight:650; text-align:right; }
+.context-action-row { display:flex; align-items:center; justify-content:space-between; width:100%; padding:9px 8px; border:0; border-radius:9px; background:transparent; color:inherit; text-align:left; cursor:pointer; }
+.context-action-row:hover { background:rgba(190,160,255,.08); }
+.context-action-row > span { display:flex; flex-direction:column; gap:3px; }
+.context-action-row strong { font-size:11px; font-weight:650; }
+.context-action-row small { color:#a99db9; font-size:9px; }
+.context-action-row b { color:#c6adff; font-size:13px; }
+.context-mode-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+.context-mode-chip { padding:8px 6px; border:1px solid rgba(190,160,255,.13); border-radius:8px; background:rgba(255,255,255,.025); color:#c6bad7; font-size:10px; cursor:pointer; transition:all .16s ease; }
+.context-mode-chip:hover,.context-mode-chip.active { border-color:rgba(194,169,255,.4); background:rgba(177,143,245,.13); color:#e5d6ff; }
+.context-mode-chip:disabled { opacity:.45; cursor:not-allowed; }
+.context-dock-foot { display:flex; gap:8px; align-items:center; padding:15px 2px 2px; color:#8f829f; font-size:9px; line-height:1.5; }
+.context-dock-foot > span:first-child { color:#c6adff; }
+.context-dock-trigger.active { border-color:rgba(194,169,255,.38); background:rgba(177,143,245,.13); color:#dfceff; }
+@media (max-width:1100px) {
+  .workspace:has(.context-dock) > .workspace-content-with-dock { width:100%; }
+  .context-dock { position:fixed; top:72px; right:12px; bottom:12px; width:min(300px,calc(100vw - 24px)); z-index:30; }
+}
+@media (max-width:640px) { .context-dock { top:66px; } }
+@media (prefers-reduced-motion:reduce) { .context-dock { animation:none; } .context-live-indicator.working { animation:none; } }
