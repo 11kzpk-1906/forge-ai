@@ -6,6 +6,7 @@ import { useAuth } from "./providers/AuthProvider";
 import { useChat } from "../features/chat/hooks/useChat";
 import { MemoryPanel } from "../features/memory/MemoryPanel";
 import { ProjectsPanel } from "../features/projects/ProjectsPanel";
+import { DashboardHome } from "../features/dashboard/DashboardHome";
 import {
   deleteConversation,
   getConversationMessages,
@@ -579,6 +580,13 @@ function App() {
           </button>
 
           <button
+            className="dashboard-home-nav"
+            onClick={() => { clearMessages(); setActiveConversationId(null); setShowProjects(false); setShowMemory(false); setShowSettings(false); setMessage(""); }}
+          >
+            <span className="dashboard-home-icon">⌂</span><span>Home</span>
+          </button>
+
+          <button
             className={showMemory ? "memory-nav-button active" : "memory-nav-button"}
             onClick={() => { setShowMemory(true); setShowSettings(false); setShowProjects(false); }}
             aria-current={showMemory ? "page" : undefined}
@@ -890,32 +898,23 @@ function App() {
             </button>
           </section>
         ) : messages.length === 0 ? (
-          <section className="welcome-workspace">
-            <div className="grid-overlay" />
-
-            <div className="welcome-content">
-              <div className="welcome-ai-mark">
-                <img src={logoUrl} alt="ForgeAI" />
-              </div>
-              <h1 className="welcome-title">
-                <span>What can we imagine</span>{" "}
-                <em>together?</em>
-              </h1>
-              <p className="welcome-description">
-                Your AI engineering workspace. Debug, design, research, and build with a copilot that thinks in systems.
-              </p>
-              <div className="welcome-workspace-meta"><span><i /> SYSTEM READY</span><span>GROQ ENGINE</span><button type="button" onClick={() => { setCommandOpen(true); setCommandQuery(""); }}>⌘K COMMAND CENTER</button></div>
-              <div className="starter-grid">
-                {starterCards.map((card) => (
-                  <button className="starter-card" key={card.title} onClick={() => handleStarter(card)}>
-                    <span className="starter-icon">{card.icon}</span>
-                    <span className="starter-copy"><strong>{card.title}</strong><small>{card.mode} workflow</small></span>
-                    <span className="starter-arrow">↗</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </section>
+          <DashboardHome
+            userKey={user?.id ?? user?.email ?? "local"}
+            userLabel={user?.email?.split("@")[0] ?? "ENGINEER"}
+            conversations={conversations}
+            onNewChat={handleNewChat}
+            onOpenProjects={() => { setShowProjects(true); setShowMemory(false); setShowSettings(false); }}
+            onOpenMemory={() => { setShowMemory(true); setShowProjects(false); setShowSettings(false); }}
+            onOpenHistory={() => {
+              const latest = [...conversations].sort((left, right) => new Date(right.updated_at).getTime() - new Date(left.updated_at).getTime())[0];
+              if (latest) void handleSelectConversation(latest);
+            }}
+            onSelectMode={(selectedMode) => {
+              setMode(selectedMode as Mode);
+              requestAnimationFrame(() => textareaRef.current?.focus());
+            }}
+            onOpenCommand={() => { setCommandOpen(true); setCommandQuery(""); }}
+          />
         ) : (
           <section className={compactMessages ? "messages messages-compact" : "messages"}>
             {messages.map((item, index) => {
@@ -978,7 +977,7 @@ function App() {
           </section>
         )}
 
-        {!showSettings && !showMemory && (
+        {!showSettings && !showMemory && !showProjects && (
           <section className="composer-area">
             <div className="composer-mode-row">
               <div className="mode-segment">
