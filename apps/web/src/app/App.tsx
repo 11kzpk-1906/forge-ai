@@ -202,10 +202,6 @@ function App() {
   const [copiedMessage, setCopiedMessage] = useState<number | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const [theme, setTheme] = useState<"dark" | "light">(() => {
-    const saved = localStorage.getItem("forgeai-theme");
-    return saved === "light" || saved === "dim" ? "light" : "dark";
-  });
   const [compactMessages, setCompactMessages] = useState(
     () => localStorage.getItem("forgeai-compact-messages") === "true",
   );
@@ -228,9 +224,10 @@ function App() {
   }, [autoHideSidebar]);
 
   useEffect(() => {
-    localStorage.setItem("forgeai-theme", theme);
-    document.documentElement.dataset.forgeaiTheme = theme;
-  }, [theme]);
+    localStorage.removeItem("forgeai-theme");
+    document.documentElement.dataset.forgeaiTheme = "dark";
+    document.documentElement.style.colorScheme = "dark";
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("forgeai-compact-messages", String(compactMessages));
@@ -520,7 +517,6 @@ function App() {
     { id: "memory", label: "Open Memory Vault", detail: "Review saved context and memories", icon: "◇", run: () => { setShowMemory(true); setShowSettings(false); } },
     { id: "settings", label: "Open settings", detail: "Personalize your workspace", icon: "⚙", run: () => { setShowSettings(true); setShowMemory(false); } },
     { id: "sidebar", label: sidebarHidden ? "Show sidebar" : "Hide sidebar", detail: "Toggle navigation panel", icon: "☷", run: () => sidebarHidden ? revealSidebar() : hideSidebar() },
-    { id: "theme", label: theme === "dark" ? "Switch to light theme" : "Switch to dark theme", detail: "Change workspace appearance", icon: "◐", run: () => setTheme(theme === "dark" ? "light" : "dark") },
     { id: "focus", label: "Focus message composer", detail: "Jump straight to your prompt", icon: "↵", run: () => { setShowSettings(false); setShowMemory(false); requestAnimationFrame(() => textareaRef.current?.focus()); } },
     ...modes.map((item) => ({ id: "mode-" + item, label: item + " mode", detail: "Set ForgeAI engineering mode", icon: "⌘", run: () => { setMode(item); setShowSettings(false); setShowMemory(false); requestAnimationFrame(() => textareaRef.current?.focus()); } })),
   ];
@@ -552,7 +548,7 @@ function App() {
   }, [commandQuery]);
 
   return (
-    <div className={theme === "dark" ? "app-shell theme-dark" : "app-shell theme-light"}>
+    <div className="app-shell theme-dark">
       <aside
         className={sidebarHidden ? "sidebar sidebar-hidden" : "sidebar"}
         onMouseEnter={revealSidebar}
@@ -746,7 +742,7 @@ function App() {
                     <span className="command-result-copy"><strong>{item.label}</strong><small>{item.detail}</small></span>
                     {index === commandIndex && <kbd>↵</kbd>}
                   </button>
-                )) : <div className="command-empty">No matching commands. Try “memory”, “theme”, or a mode.</div>}
+                )) : <div className="command-empty">No matching commands. Try “memory” or a mode.</div>}
               </div>
               <footer className="command-footer"><span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span><span><kbd>↵</kbd> Run command</span><span><kbd>ESC</kbd> Close</span></footer>
             </section>
@@ -801,15 +797,6 @@ function App() {
                 </select>
               </div>
               <div className="settings-card settings-control-card">
-                <span className="settings-card-label">APPEARANCE</span>
-                <strong>{theme === "dark" ? "Dark" : "Light"}</strong>
-                <p>Adjust the workspace contrast.</p>
-                <div className="settings-segment">
-                  <button className={theme === "dark" ? "active" : ""} onClick={() => setTheme("dark")}>Dark</button>
-                  <button className={theme === "light" ? "active" : ""} onClick={() => setTheme("light")}>Light</button>
-                </div>
-              </div>
-              <div className="settings-card settings-control-card">
                 <span className="settings-card-label">INTERFACE</span>
                 <strong>Sidebar behavior</strong>
                 <p>Automatically hide the sidebar after inactivity.</p>
@@ -848,18 +835,16 @@ function App() {
               <div className="settings-card settings-control-card">
                 <span className="settings-card-label">PREFERENCES</span>
                 <strong>Reset ForgeAI settings</strong>
-                <p>Restore theme, mode, interface, display, and keyboard defaults.</p>
+                <p>Restore mode, interface, display, and keyboard defaults.</p>
                 <button
                   className="settings-reset-button"
                   onClick={() => {
-                    localStorage.removeItem("forgeai-theme");
                     localStorage.removeItem("forgeai-personality");
                     localStorage.removeItem("forgeai-default-mode");
                     localStorage.removeItem("forgeai-sidebar-autohide");
                     localStorage.removeItem("forgeai-compact-messages");
                     localStorage.removeItem("forgeai-keyboard-hints");
                     localStorage.removeItem("forgeai-reduced-motion");
-                    setTheme("dark");
                     setPersonality("friendly_engineer");
                     setMode("Explain");
                     setAutoHideSidebar(false);
