@@ -5,6 +5,7 @@ import { ThinkingTimeline } from "../components/ThinkingTimeline";
 import { useAuth } from "./providers/AuthProvider";
 import { useChat } from "../features/chat/hooks/useChat";
 import { MemoryPanel } from "../features/memory/MemoryPanel";
+import { ProjectsPanel } from "../features/projects/ProjectsPanel";
 import {
   deleteConversation,
   getConversationMessages,
@@ -189,6 +190,7 @@ function App() {
   const [search, setSearch] = useState("");
   const [showSettings, setShowSettings] = useState(false);
   const [showMemory, setShowMemory] = useState(false);
+  const [showProjects, setShowProjects] = useState(false);
   const [showAllModes, setShowAllModes] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
@@ -491,6 +493,7 @@ function App() {
     setHistoryError(null);
     setShowSettings(false);
     setShowMemory(false);
+    setShowProjects(false);
     setMessage("");
   };
 
@@ -514,8 +517,9 @@ function App() {
 
   const commandActions = [
     { id: "new-chat", label: "Start a new chat", detail: "Clear the current conversation", icon: "＋", run: handleNewChat },
-    { id: "memory", label: "Open Memory Vault", detail: "Review saved context and memories", icon: "◇", run: () => { setShowMemory(true); setShowSettings(false); } },
-    { id: "settings", label: "Open settings", detail: "Personalize your workspace", icon: "⚙", run: () => { setShowSettings(true); setShowMemory(false); } },
+    { id: "memory", label: "Open Memory Vault", detail: "Review saved context and memories", icon: "◇", run: () => { setShowMemory(true); setShowSettings(false); setShowProjects(false); } },
+    { id: "projects", label: "Open project workspaces", detail: "Organize builds, context, and tasks", icon: "▦", run: () => { setShowProjects(true); setShowMemory(false); setShowSettings(false); } },
+    { id: "settings", label: "Open settings", detail: "Personalize your workspace", icon: "⚙", run: () => { setShowSettings(true); setShowMemory(false); setShowProjects(false); } },
     { id: "sidebar", label: sidebarHidden ? "Show sidebar" : "Hide sidebar", detail: "Toggle navigation panel", icon: "☷", run: () => sidebarHidden ? revealSidebar() : hideSidebar() },
     { id: "focus", label: "Focus message composer", detail: "Jump straight to your prompt", icon: "↵", run: () => { setShowSettings(false); setShowMemory(false); requestAnimationFrame(() => textareaRef.current?.focus()); } },
     ...modes.map((item) => ({ id: "mode-" + item, label: item + " mode", detail: "Set ForgeAI engineering mode", icon: "⌘", run: () => { setMode(item); setShowSettings(false); setShowMemory(false); requestAnimationFrame(() => textareaRef.current?.focus()); } })),
@@ -582,6 +586,16 @@ function App() {
             <span className="memory-nav-icon">◇</span>
             <span>Memory vault</span>
             <span className="memory-nav-arrow">↗</span>
+          </button>
+
+          <button
+            className={showProjects ? "projects-nav-button active" : "projects-nav-button"}
+            onClick={() => { setShowProjects(true); setShowMemory(false); setShowSettings(false); }}
+            aria-current={showProjects ? "page" : undefined}
+          >
+            <span className="projects-nav-icon">▦</span>
+            <span>Projects</span>
+            <span className="projects-nav-arrow">↗</span>
           </button>
 
           <div className="sidebar-section-label">RECENT</div>
@@ -669,10 +683,12 @@ function App() {
           <div className="workspace-title">
             <span className="workspace-title-mark">/</span>
             <strong>
-              {showMemory
-                ? "Memory vault"
-                : showSettings
-                  ? "Settings"
+              {showProjects
+                ? "Project workspaces"
+                : showMemory
+                  ? "Memory vault"
+                  : showSettings
+                    ? "Settings"
                   : messages.length > 0
                     ? conversations.find(
                         (item) => item.id === activeConversationId,
@@ -749,7 +765,18 @@ function App() {
           </div>
         )}
 
-        {showMemory ? (
+        {showProjects ? (
+          <ProjectsPanel
+            userKey={user?.id ?? user?.email ?? "local"}
+            onStartChat={(prompt) => {
+              handleNewChat();
+              setShowProjects(false);
+              setMode("Architect");
+              setMessage(prompt);
+              requestAnimationFrame(() => textareaRef.current?.focus());
+            }}
+          />
+        ) : showMemory ? (
           <MemoryPanel conversationId={activeConversationId} />
         ) : showSettings ? (
           <section className="settings-panel">
