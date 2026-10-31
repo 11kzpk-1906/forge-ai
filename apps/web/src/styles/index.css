@@ -1787,3 +1787,129 @@ button:disabled { cursor: not-allowed; }
   .theme-dark .thinking-timeline { animation:none; }
   .theme-dark .thinking-progress span { transition:none; }
 }
+
+
+/* Light theme contrast + component parity */
+.theme-light {
+  color-scheme: light;
+  color: #282238;
+  background: #f5f3fa;
+  border-color: #e3dced;
+}
+.theme-light .sidebar { color: #342b43; border-right-color: #e3dced; }
+.theme-light .brand-name,.theme-light .workspace-title,
+.theme-light .welcome-title,.theme-light .settings-heading h1 { color:#292238; }
+.theme-light .brand-kicker,.theme-light .account-label,
+.theme-light .keyboard-hint,.theme-light .composer-context { color:#81768f; }
+.theme-light .workspace { color:#342b43; }
+.theme-light .workspace-header { border-bottom-color:#e5dfed; }
+.theme-light .chat-search:focus-within,.theme-light .composer:focus-within {
+  border-color:#9b83e8; box-shadow:0 0 0 3px rgba(139,111,232,.11);
+}
+.theme-light .history-item { color:#6f647d; }
+.theme-light .history-item:hover,.theme-light .history-item.active {
+  background:#fff; border-color:#ded4ee; color:#352a45;
+}
+.theme-light .history-delete-button:hover:not(:disabled) {
+  border-color:#ead5df; background:#fff3f6; color:#b34f70;
+}
+.theme-light .account-email { color:#62586e; }
+.theme-light .account-action { color:#786d86; }
+.theme-light .account-action:hover { background:#fff; color:#7456ca; }
+.theme-light .header-icon-button { color:#756b82; }
+.theme-light .header-icon-button:hover { background:#fff; border-color:#e1d8ec; color:#493b61; }
+.theme-light .demo-pill { background:#f0eaff; border-color:#ded2f4; color:#7055bb; }
+.theme-light .welcome-description { color:#746a80; }
+.theme-light .starter-card { color:#392f48; border-color:#e3dced; background:#fff; }
+.theme-light .starter-card:hover { border-color:#cbbbe9; background:#fff; }
+.theme-light .starter-copy strong { color:#3b304b; }
+.theme-light .starter-copy small { color:#887d95; }
+.theme-light .message-content { background:#fff; border-color:#e2dbea; color:#393144; }
+.theme-light .user-content { background:#f0ebfa; border-color:#ddd2f0; color:#352a45; }
+.theme-light .role-chip { color:#7558c8; }
+.theme-light .role-chip.user { color:#82778e; }
+.theme-light .message-actions button { background:#fff; border-color:#e1d9e9; color:#766b83; }
+.theme-light .message-actions button:hover:not(:disabled) { border-color:#cbbbe9; color:#7255c5; }
+.theme-light .composer-area { border-top-color:#e4deee; }
+.theme-light .mode-segment { background:#fff; border-color:#e1d9eb; }
+.theme-light .mode-pill,.theme-light .mode-more { color:#786e85; }
+.theme-light .mode-pill:hover:not(:disabled),.theme-light .mode-more:hover:not(:disabled) { color:#453957; }
+.theme-light .mode-pill.selected { color:#fff; }
+.theme-light .mode-popover { background:#fff; border-color:#ded4e9; }
+.theme-light .mode-popover-item { color:#71667e; }
+.theme-light .mode-popover-item:hover,.theme-light .mode-popover-item.active { background:#f3edff; color:#7053c5; }
+.theme-light .composer { background:#fff; border-color:#ded6e8; }
+.theme-light .composer textarea { color:#30273a; }
+.theme-light .composer textarea::placeholder { color:#9a90a4; }
+.theme-light .composer-disclaimer { color:#91879b; }
+.theme-light .settings-card { background:#fff; border-color:#e2d9ec; }
+.theme-light .settings-card-label { color:#81758f; }
+.theme-light .settings-card strong { color:#382e45; }
+.theme-light .settings-card p { color:#81768d; }
+.theme-light .settings-select,.theme-light .settings-segment button,.theme-light .settings-toggle {
+  background:#faf8fd; border-color:#ded5e8; color:#6f647d;
+}
+.theme-light .settings-segment button.active,.theme-light .settings-segment button:hover {
+  background:#f1ebff; border-color:#c7b5e7; color:#7053c5;
+}
+.theme-light .settings-toggle.on { border-color:#c4b1e5; color:#7053c5; }
+.theme-light .settings-toggle.on i { background:#9476e5; }
+.theme-light .settings-signout,.theme-light .settings-reset-button {
+  background:#fff; border-color:#ded5e8; color:#756982;
+}
+.theme-light .settings-signout:hover,.theme-light .settings-reset-button:hover {
+  background:#f5f0ff; border-color:#c7b5e7; color:#7053c5;
+}
+.theme-light .connected-badge { border-color:#d8cbee; color:#7055b8; }
+.theme-light .code-block {
+  border-color:#e0d9e9; background:#fff; box-shadow:0 5px 18px rgba(68,51,96,.055);
+}
+.theme-light .code-block-header { background:#f5f2fa; border-bottom-color:#e5deed; }
+.theme-light .code-file-tab { color:#6d6279; }
+.theme-light .code-file-dot { background:#9275df; box-shadow:0 0 7px rgba(146,117,223,.25); }
+.theme-light .code-copy-button { background:#fff; border-color:#ded5e8; color:#746982; }
+.theme-light .code-copy-button:hover { background:#f4efff; border-color:#c7b5e7; color:#7053c5; }
+.theme-light .code-line-numbers { background:#f8f6fb; border-right-color:#e6dfed; color:#9b91a5; }
+.theme-light .code-editor pre { color:#383044; }
+.theme-light .inline-code { background:#f0ebfa; border-color:#e0d6f0; color:#7053b7; }
+.theme-light .history::-webkit-scrollbar-thumb,.theme-light .messages::-webkit-scrollbar-thumb { background:#d6cde2; }
+
+/* Thinking timeline: fully styled in both themes, without implying model chain-of-thought. */
+.theme-light .thinking-timeline {
+  width:min(100%,560px); padding:17px 18px 13px; border:1px solid #e2d9ef;
+  border-radius:16px; background:linear-gradient(145deg,#fff,#f8f6fd);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 12px 30px rgba(78,57,112,.07);
+  color:#352b46; animation:thinking-enter .28s ease-out both;
+}
+.theme-light .thinking-timeline-heading { display:flex; align-items:center; gap:11px; padding-bottom:14px; border-bottom:1px solid #eee8f4; }
+.theme-light .thinking-timeline-heading > div { display:grid; gap:4px; min-width:0; flex:1; }
+.theme-light .thinking-timeline-heading strong { color:#382d49; font-size:12px; font-weight:650; }
+.theme-light .thinking-timeline-heading small { color:#8b8098; font:9px "JetBrains Mono",monospace; letter-spacing:.08em; }
+.theme-light .thinking-orbit { display:grid; place-items:center; width:31px; height:31px; border:1px solid #ded3f2; border-radius:50%; background:#f3efff; }
+.theme-light .thinking-orbit i { width:10px; height:10px; border:2px solid #8669dc; border-right-color:transparent; border-radius:50%; animation:thinking-spin 1s linear infinite; }
+.theme-light .thinking-live { display:inline-flex; align-items:center; gap:5px; color:#27845f; font:9px "JetBrains Mono",monospace; }
+.theme-light .thinking-live i { width:6px; height:6px; border-radius:50%; background:#39ae7d; }
+.theme-light .thinking-stages { display:grid; gap:0; padding:9px 0 7px; }
+.theme-light .thinking-stage { position:relative; display:flex; align-items:center; gap:10px; min-height:47px; opacity:.48; }
+.theme-light .thinking-stage:not(:last-child)::after { content:""; position:absolute; left:13px; top:33px; width:1px; height:17px; background:#e6deef; }
+.theme-light .thinking-stage-marker { display:grid; place-items:center; width:27px; height:27px; flex:0 0 27px; border:1px solid #e2d9eb; border-radius:9px; color:#8a8095; font-size:11px; }
+.theme-light .thinking-stage-copy { display:grid; gap:3px; min-width:0; flex:1; }
+.theme-light .thinking-stage-copy strong { color:#675b76; font-size:10px; font-weight:550; }
+.theme-light .thinking-stage-copy small { color:#958aa0; font-size:9px; }
+.theme-light .thinking-stage-state { color:#998fa4; font:8px "JetBrains Mono",monospace; letter-spacing:.06em; }
+.theme-light .thinking-stage.complete,.theme-light .thinking-stage.active { opacity:1; }
+.theme-light .thinking-stage.complete .thinking-stage-marker { border-color:#cde9dc; background:#effaf4; color:#27845f; }
+.theme-light .thinking-stage.active .thinking-stage-marker { border-color:#cdbff0; background:#f2edff; color:#7558c8; }
+.theme-light .thinking-stage.active .thinking-stage-copy strong { color:#382d49; }
+.theme-light .thinking-stage.active .thinking-stage-state { color:#7659c8; }
+.theme-light .thinking-progress { height:3px; overflow:hidden; border-radius:9px; background:#eee9f4; }
+.theme-light .thinking-progress span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#8b70e3,#a28af0); transition:width .5s ease; }
+.theme-light .thinking-footnote { margin:9px 0 0; color:#958aa0; font-size:8px; line-height:1.5; }
+@media (max-width:640px) {
+  .theme-light .thinking-timeline { padding:14px 12px 11px; }
+  .theme-light .thinking-stage-state { font-size:7px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .theme-light .thinking-orbit i,.theme-light .thinking-timeline { animation:none; }
+  .theme-light .thinking-progress span { transition:none; }
+}
