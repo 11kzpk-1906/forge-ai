@@ -143,6 +143,12 @@ export function AuthScreen() {
         provider: "google",
         options: {
           redirectTo: isDesktop ? "forgeai://auth/callback" : window.location.origin,
+          // Ask Google to show accounts already signed in to the browser profile.
+          // The user can select one without re-entering a password if Google has
+          // an active session for that account.
+          queryParams: {
+            prompt: "select_account",
+          },
           skipBrowserRedirect: true,
         },
       });
@@ -241,7 +247,7 @@ export function AuthScreen() {
           </span>
           <span className="auth-google-copy">
             <span className="auth-google-title">Continue with Google</span>
-            <span className="auth-google-subtitle">Quick, secure sign-in with your Google account</span>
+            <span className="auth-google-subtitle">Choose a Google account already signed in to your browser</span>
           </span>
           <span className="auth-google-arrow" aria-hidden="true">→</span>
         </button>
