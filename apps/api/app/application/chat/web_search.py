@@ -24,7 +24,8 @@ def should_search_web(query: str) -> bool:
         "today", "right now", "this week", "recent", "breaking", "news",
         "2026", "2025", "price", "pricing", "release date", "new version",
         "latest version", "documentation", "is it still", "who is the",
-        "what happened",
+        "what happened", "weather", "exchange rate", "currency", "stock price",
+        "who won", "score", "standings", "schedule", "election results",
     )
     return any(signal in text for signal in signals)
 
@@ -45,7 +46,10 @@ async def search_web(
         "api_key": api_key,
         "query": query[:500],
         "search_depth": "advanced" if research_mode else "basic",
-        "topic": "general",
+        "topic": "news" if any(
+            signal in query.casefold()
+            for signal in ("news", "breaking", "this week", "today", "what happened")
+        ) else "general",
         "max_results": result_limit,
         "include_answer": False,
         "include_raw_content": False,
@@ -68,6 +72,8 @@ async def search_web(
                 "title": title[:240],
                 "url": url[:1000],
                 "content": content[:content_limit],
+                "score": str(item.get("score", "")),
+                "published_date": str(item.get("published_date") or item.get("published") or ""),
             })
         return results
     except Exception:
