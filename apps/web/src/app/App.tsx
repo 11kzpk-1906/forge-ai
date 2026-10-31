@@ -521,8 +521,8 @@ function App() {
     { id: "projects", label: "Open project workspaces", detail: "Organize builds, context, and tasks", icon: "▦", run: () => { setShowProjects(true); setShowMemory(false); setShowSettings(false); } },
     { id: "settings", label: "Open settings", detail: "Personalize your workspace", icon: "⚙", run: () => { setShowSettings(true); setShowMemory(false); setShowProjects(false); } },
     { id: "sidebar", label: sidebarHidden ? "Show sidebar" : "Hide sidebar", detail: "Toggle navigation panel", icon: "☷", run: () => sidebarHidden ? revealSidebar() : hideSidebar() },
-    { id: "focus", label: "Focus message composer", detail: "Jump straight to your prompt", icon: "↵", run: () => { setShowSettings(false); setShowMemory(false); requestAnimationFrame(() => textareaRef.current?.focus()); } },
-    ...modes.map((item) => ({ id: "mode-" + item, label: item + " mode", detail: "Set ForgeAI engineering mode", icon: "⌘", run: () => { setMode(item); setShowSettings(false); setShowMemory(false); requestAnimationFrame(() => textareaRef.current?.focus()); } })),
+    { id: "focus", label: "Focus message composer", detail: "Jump straight to your prompt", icon: "↵", run: () => { setShowSettings(false); setShowMemory(false); setShowProjects(false); requestAnimationFrame(() => textareaRef.current?.focus()); } },
+    ...modes.map((item) => ({ id: "mode-" + item, label: item + " mode", detail: "Set ForgeAI engineering mode", icon: "⌘", run: () => { setMode(item); setShowSettings(false); setShowMemory(false); setShowProjects(false); requestAnimationFrame(() => textareaRef.current?.focus()); } })),
   ];
   const filteredCommands = commandActions.filter((item) =>
     (item.label + " " + item.detail).toLowerCase().includes(commandQuery.trim().toLowerCase())
@@ -580,7 +580,7 @@ function App() {
 
           <button
             className={showMemory ? "memory-nav-button active" : "memory-nav-button"}
-            onClick={() => { setShowMemory(true); setShowSettings(false); }}
+            onClick={() => { setShowMemory(true); setShowSettings(false); setShowProjects(false); }}
             aria-current={showMemory ? "page" : undefined}
           >
             <span className="memory-nav-icon">◇</span>
@@ -673,7 +673,7 @@ function App() {
             <div className="plan-card-top"><span>Free plan</span><strong>7 / 10</strong></div>
             <div className="plan-progress"><span /></div>
           </div>
-          <button className="sidebar-settings-button" title="Settings" onClick={() => { setShowSettings(true); setShowMemory(false); }}>⚙</button>
+          <button className="sidebar-settings-button" title="Settings" onClick={() => { setShowSettings(true); setShowMemory(false); setShowProjects(false); }}>⚙</button>
         </div>
       </aside>
 
@@ -719,7 +719,7 @@ function App() {
             <button
               className="header-icon-button"
               title="Settings"
-              onClick={() => { setShowSettings((value) => !value); setShowMemory(false); }}
+              onClick={() => { setShowSettings((value) => !value); setShowMemory(false); setShowProjects(false); }}
             >
               ⚙
             </button>
