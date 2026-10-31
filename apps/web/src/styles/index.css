@@ -2943,8 +2943,13 @@ button:disabled { cursor: not-allowed; }
 
 
 /* Lavender Studio — live context dock */
-.workspace-content-with-dock { min-width:0; flex:1; display:flex; flex-direction:column; }
-.workspace-content { min-width:0; flex:1; display:flex; flex-direction:column; }
+/* Keep the chat column bounded so the composer stays visible below the scrollable content. */
+.workspace-content-with-dock { min-width:0; min-height:0; flex:1 1 0%; display:flex; flex-direction:column; overflow:hidden; }
+.workspace-content { min-width:0; min-height:0; flex:1 1 0%; display:flex; flex-direction:column; overflow:hidden; }
+.workspace-content-with-dock > .welcome-workspace,
+.workspace-content > .welcome-workspace { min-height:0; flex:1 1 0%; }
+.workspace-content-with-dock > .composer-area,
+.workspace-content > .composer-area { flex:0 0 auto; }
 .workspace:has(.context-dock) { position:relative; }
 .workspace:has(.context-dock) > .workspace-content-with-dock { width:calc(100% - 286px); }
 .context-dock {
