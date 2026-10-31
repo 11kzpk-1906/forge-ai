@@ -889,9 +889,18 @@ function App() {
                 <em>together?</em>
               </h1>
               <p className="welcome-description">
-                Ask anything, explore ideas, or bring your thoughts to life.
-                I’m here to think with you.
+                Your AI engineering workspace. Debug, design, research, and build with a copilot that thinks in systems.
               </p>
+              <div className="welcome-workspace-meta"><span><i /> SYSTEM READY</span><span>GROQ ENGINE</span><button type="button" onClick={() => { setCommandOpen(true); setCommandQuery(""); }}>⌘K COMMAND CENTER</button></div>
+              <div className="starter-grid">
+                {starterCards.map((card) => (
+                  <button className="starter-card" key={card.title} onClick={() => handleStarter(card)}>
+                    <span className="starter-icon">{card.icon}</span>
+                    <span className="starter-copy"><strong>{card.title}</strong><small>{card.mode} workflow</small></span>
+                    <span className="starter-arrow">↗</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </section>
         ) : (
