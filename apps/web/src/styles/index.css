@@ -1913,3 +1913,129 @@ button:disabled { cursor: not-allowed; }
   .theme-light .thinking-orbit i,.theme-light .thinking-timeline { animation:none; }
   .theme-light .thinking-progress span { transition:none; }
 }
+
+
+/* Project workspaces — dark engineering command center */
+.projects-nav-button { display:flex; align-items:center; gap:11px; width:100%; min-height:39px; margin-top:6px; padding:0 11px; border:1px solid transparent; border-radius:9px; background:transparent; color:#8996b0; text-align:left; font:600 11px Inter,sans-serif; cursor:pointer; transition:all .18s ease; }
+.projects-nav-button:hover,.projects-nav-button.active { border-color:rgba(96,165,250,.17); background:linear-gradient(90deg,rgba(59,130,246,.12),rgba(99,102,241,.06)); color:#c5d9fb; }
+.projects-nav-icon { display:grid; place-items:center; width:21px; color:#82b7ff; font-size:16px; }
+.projects-nav-arrow { margin-left:auto; color:#6680a8; opacity:0; }
+.projects-nav-button:hover .projects-nav-arrow,.projects-nav-button.active .projects-nav-arrow { opacity:1; }
+.projects-panel { position:relative; z-index:1; width:min(1120px,calc(100% - 72px)); height:calc(100% - 1px); margin:0 auto; padding:38px 0 44px; overflow-y:auto; color:#e5edff; scrollbar-color:#34425e transparent; }
+.projects-panel::-webkit-scrollbar { width:7px; }
+.projects-panel::-webkit-scrollbar-thumb { border-radius:8px; background:#34425e; }
+.projects-eyebrow { color:#7794c0; font:600 9px "JetBrains Mono",monospace; letter-spacing:.17em; }
+.projects-page-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:27px; }
+.projects-page-heading h1,.projects-detail-title h1 { margin:9px 0 7px; color:#edf3ff; font-size:clamp(28px,3vw,39px); font-weight:700; letter-spacing:-.055em; }
+.projects-page-heading h1 span { color:#72aaff; }
+.projects-page-heading p,.projects-detail-title p { max-width:610px; margin:0; color:#8795b0; font-size:12px; line-height:1.7; }
+.projects-primary-button,.projects-secondary-button,.projects-danger-button { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:39px; padding:0 14px; border:1px solid rgba(96,165,250,.3); border-radius:9px; background:linear-gradient(110deg,#3478ed,#765be0); color:#fff; font:650 10px Inter,sans-serif; text-decoration:none; cursor:pointer; white-space:nowrap; box-shadow:0 6px 18px rgba(59,130,246,.16); transition:transform .18s ease,border-color .18s ease,filter .18s ease; }
+.projects-primary-button:hover,.projects-secondary-button:hover { transform:translateY(-1px); filter:brightness(1.1); }
+.projects-primary-button:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+.projects-secondary-button { border-color:rgba(125,158,210,.22); background:rgba(255,255,255,.04); color:#b9d2f8; box-shadow:none; }
+.projects-danger-button { min-height:32px; border-color:rgba(248,113,113,.2); background:rgba(248,113,113,.07); color:#f39aa3; box-shadow:none; }
+.projects-stats-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:32px; }
+.projects-stat-card,.projects-card,.projects-create-card { border:1px solid rgba(123,151,198,.16); border-radius:14px; background:linear-gradient(145deg,rgba(19,27,47,.88),rgba(12,17,31,.9)); box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 10px 30px rgba(0,0,0,.1); }
+.projects-stat-card { display:grid; gap:8px; min-height:108px; padding:17px 19px; }
+.projects-stat-card > span { color:#7788a8; font:600 8px "JetBrains Mono",monospace; letter-spacing:.14em; }
+.projects-stat-card strong { color:#eaf2ff; font:650 27px "JetBrains Mono",monospace; letter-spacing:-.06em; }
+.projects-stat-card strong i { color:#72819d; font-size:12px; font-style:normal; letter-spacing:0; }
+.projects-stat-card small { color:#71809b; font-size:10px; }
+.projects-create-card { margin:0 0 30px; padding:21px; border-color:rgba(96,165,250,.24); }
+.projects-card-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; }
+.projects-card-heading h2,.projects-list-toolbar h2 { margin:5px 0 0; color:#e6edfb; font-size:16px; letter-spacing:-.025em; }
+.projects-close-button { border:0; background:transparent; color:#8290aa; font-size:23px; cursor:pointer; }
+.projects-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.projects-form-grid label { display:grid; gap:7px; color:#a8b7d0; font-size:10px; font-weight:600; }
+.projects-form-grid input,.projects-form-grid textarea,.projects-context-card textarea,.projects-task-form input,.projects-search input,.projects-filters select,.projects-status-control select { width:100%; min-width:0; border:1px solid rgba(126,151,190,.2); border-radius:8px; outline:none; background:#0b1120; color:#e2ebfc; font:11px Inter,sans-serif; }
+.projects-form-grid input,.projects-form-grid textarea { padding:11px 12px; resize:vertical; }
+.projects-form-grid input:focus,.projects-form-grid textarea:focus,.projects-context-card textarea:focus,.projects-task-form input:focus { border-color:rgba(96,165,250,.55); box-shadow:0 0 0 3px rgba(59,130,246,.09); }
+.projects-form-grid input::placeholder,.projects-form-grid textarea::placeholder,.projects-context-card textarea::placeholder,.projects-task-form input::placeholder,.projects-search input::placeholder { color:#596781; }
+.projects-form-wide { grid-column:1/-1; }
+.projects-optional { margin-left:5px; color:#6d83a6; font:8px "JetBrains Mono",monospace; }
+.projects-form-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:17px; }
+.projects-form-actions > span,.projects-field-hint { color:#687995; font-size:9px; }
+.projects-validation-error { margin:12px 0 0; color:#f09aa7; font-size:10px; }
+.projects-list-toolbar { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin-bottom:16px; }
+.projects-list-toolbar h2 span { margin-left:5px; color:#6f8fbd; font:10px "JetBrains Mono",monospace; }
+.projects-filters { display:flex; align-items:center; gap:8px; }
+.projects-search { display:flex; align-items:center; gap:7px; width:190px; height:34px; padding:0 10px; border:1px solid rgba(126,151,190,.17); border-radius:8px; background:#0b1120; color:#7ea8df; }
+.projects-search input { border:0; background:transparent; font-size:10px; }
+.projects-filters select { width:auto; height:34px; padding:0 25px 0 9px; color:#aabbd5; font-size:10px; }
+.projects-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.projects-project-card { display:block; min-width:0; padding:17px; border:1px solid rgba(123,151,198,.16); border-radius:13px; background:linear-gradient(145deg,rgba(18,26,45,.9),rgba(11,16,29,.94)); color:inherit; text-align:left; cursor:pointer; transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease; }
+.projects-project-card:hover { transform:translateY(-2px); border-color:rgba(96,165,250,.36); box-shadow:0 15px 35px rgba(0,0,0,.2); }
+.projects-project-card-top { display:flex; align-items:center; justify-content:space-between; }
+.projects-project-mark { display:grid; place-items:center; width:39px; height:39px; flex:0 0 39px; border:1px solid rgba(96,165,250,.24); border-radius:11px; background:linear-gradient(145deg,rgba(59,130,246,.17),rgba(139,92,246,.13)); color:#a9ceff; font:650 16px "JetBrains Mono",monospace; }
+.projects-status-badge { display:inline-flex; align-items:center; min-height:22px; padding:0 8px; border:1px solid rgba(125,158,210,.17); border-radius:20px; background:rgba(255,255,255,.035); color:#9aabc6; font:8px "JetBrains Mono",monospace; }
+.projects-status-badge::before { width:5px; height:5px; margin-right:6px; border-radius:50%; background:currentColor; content:""; }
+.projects-status-badge.status-in-progress { border-color:rgba(74,222,128,.2); background:rgba(34,197,94,.07); color:#78d5a2; }
+.projects-status-badge.status-completed { border-color:rgba(96,165,250,.2); background:rgba(59,130,246,.08); color:#8bbcff; }
+.projects-status-badge.status-paused { color:#e6bb78; }
+.projects-project-card h3 { overflow:hidden; margin:17px 0 6px; color:#e4edfc; font-size:14px; font-weight:650; text-overflow:ellipsis; white-space:nowrap; }
+.projects-project-card > p { display:-webkit-box; min-height:34px; margin:0; overflow:hidden; color:#8290a9; font-size:10px; line-height:1.65; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+.projects-project-meta { display:flex; justify-content:space-between; gap:10px; margin:16px 0 10px; color:#6f84a5; font:8px "JetBrains Mono",monospace; letter-spacing:.04em; }
+.projects-project-meta span:first-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.projects-progress-track { height:4px; overflow:hidden; border-radius:10px; background:rgba(130,151,185,.13); }
+.projects-progress-track span { display:block; height:100%; border-radius:10px; background:linear-gradient(90deg,#3b82f6,#9b8af7); transition:width .25s ease; }
+.projects-project-bottom { display:flex; justify-content:space-between; gap:8px; margin-top:9px; color:#71819e; font-size:9px; }
+.projects-project-bottom span:last-child { color:#91b8ee; }
+.projects-empty-state { display:grid; justify-items:center; padding:48px 20px; border:1px dashed rgba(123,151,198,.2); border-radius:15px; background:rgba(14,21,37,.4); text-align:center; }
+.projects-empty-orbit { display:grid; place-items:center; width:53px; height:53px; margin-bottom:14px; border:1px solid rgba(96,165,250,.24); border-radius:16px; background:rgba(59,130,246,.1); color:#9ac4ff; font-size:23px; }
+.projects-empty-state h2 { margin:0 0 7px; color:#e4edfc; font-size:16px; }
+.projects-empty-state p { max-width:420px; margin:0 0 17px; color:#8290a9; font-size:10px; line-height:1.7; }
+.projects-storage-note { display:flex; align-items:center; gap:8px; margin-top:19px; color:#64738d; font-size:9px; }
+.projects-storage-note span { color:#81aef0; }
+.projects-detail-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; }
+.projects-back-button { border:0; background:transparent; color:#8da6ca; font-size:10px; cursor:pointer; }
+.projects-back-button:hover { color:#c5dcff; }
+.projects-detail-heading { display:flex; align-items:center; gap:15px; }
+.projects-detail-heading .projects-project-mark { width:52px; height:52px; flex-basis:52px; border-radius:14px; font-size:20px; }
+.projects-detail-title { min-width:0; flex:1; }
+.projects-detail-title h1 { margin:4px 0 5px; font-size:clamp(25px,3vw,34px); }
+.projects-detail-title p { font-size:11px; }
+.projects-detail-actions { display:flex; align-items:center; flex-wrap:wrap; gap:9px; margin:23px 0 18px; }
+.projects-status-control { display:flex; align-items:center; gap:8px; margin-left:auto; color:#7789a8; font-size:9px; }
+.projects-status-control select { width:auto; min-width:120px; height:35px; padding:0 9px; }
+.projects-detail-grid { display:grid; grid-template-columns:1.05fr .95fr; gap:13px; }
+.projects-card { min-width:0; padding:19px; }
+.projects-card-icon { display:grid; place-items:center; width:31px; height:31px; border:1px solid rgba(96,165,250,.18); border-radius:9px; background:rgba(59,130,246,.08); color:#91bdff; }
+.projects-card-description { margin:-7px 0 14px; color:#7d8ca7; font-size:10px; line-height:1.65; }
+.projects-context-card textarea { min-height:190px; padding:12px; resize:vertical; line-height:1.7; }
+.projects-field-hint { margin-top:8px; }
+.projects-task-count { color:#8ebaff; font:11px "JetBrains Mono",monospace; }
+.projects-progress-caption { display:flex; justify-content:space-between; margin:7px 0 14px; color:#74839d; font-size:9px; }
+.projects-task-form { display:flex; gap:7px; margin-bottom:12px; }
+.projects-task-form input { height:36px; padding:0 10px; font-size:10px; }
+.projects-task-form button { width:36px; flex:0 0 36px; border:1px solid rgba(96,165,250,.25); border-radius:8px; background:rgba(59,130,246,.12); color:#9bc6ff; font-size:18px; cursor:pointer; }
+.projects-task-form button:disabled { opacity:.4; cursor:not-allowed; }
+.projects-task-list { display:grid; gap:5px; max-height:245px; overflow:auto; }
+.projects-task-row { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:37px; padding:0 8px; border:1px solid rgba(126,151,190,.1); border-radius:8px; background:rgba(255,255,255,.018); }
+.projects-task-row label { display:flex; align-items:center; gap:9px; min-width:0; color:#bac8de; font-size:10px; cursor:pointer; }
+.projects-task-row input { width:13px; height:13px; accent-color:#5596f2; }
+.projects-task-row label span { overflow-wrap:anywhere; }
+.projects-task-row.is-done label span { color:#71809a; text-decoration:line-through; }
+.projects-task-row > button { border:0; background:transparent; color:#66748e; font-size:17px; cursor:pointer; }
+.projects-task-row > button:hover { color:#f09aa7; }
+.projects-task-empty { padding:22px 8px; color:#71809a; font-size:10px; line-height:1.6; text-align:center; }
+.projects-detail-footer { display:flex; flex-wrap:wrap; gap:18px; margin-top:17px; color:#61718c; font:8px "JetBrains Mono",monospace; letter-spacing:.06em; }
+@media (max-width:850px) { .projects-panel { width:calc(100% - 38px); padding-top:27px; } .projects-detail-grid { grid-template-columns:1fr; } }
+@media (max-width:620px) {
+ .projects-panel { width:calc(100% - 26px); padding-top:20px; }
+ .projects-page-heading,.projects-list-toolbar { align-items:stretch; flex-direction:column; }
+ .projects-page-heading { gap:15px; }
+ .projects-page-heading .projects-primary-button { align-self:flex-start; }
+ .projects-stats-grid { gap:7px; }
+ .projects-stat-card { min-height:91px; padding:12px 10px; }
+ .projects-stat-card strong { font-size:21px; }
+ .projects-stat-card small { font-size:8px; }
+ .projects-grid,.projects-form-grid { grid-template-columns:1fr; }
+ .projects-form-wide { grid-column:auto; }
+ .projects-filters { width:100%; }
+ .projects-search { flex:1; width:auto; }
+ .projects-form-actions { align-items:flex-start; flex-direction:column; }
+ .projects-detail-heading { align-items:flex-start; flex-wrap:wrap; }
+ .projects-detail-heading .projects-danger-button { margin-left:auto; }
+ .projects-status-control { margin-left:0; }
+}
+@media (prefers-reduced-motion:reduce) { .projects-panel *, .projects-panel *::before, .projects-panel *::after { transition:none !important; animation:none !important; } }
