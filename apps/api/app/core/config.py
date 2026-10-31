@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     groq_model: str = "openai/gpt-oss-120b"
 
+    # Optional live web search (Tavily)
+    tavily_api_key: str = ""
+
     # Supabase (server-side secret; never expose to the web app)
     supabase_url: str = ""
     supabase_secret_key: str = ""
