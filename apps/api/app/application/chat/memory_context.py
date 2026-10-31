@@ -37,6 +37,50 @@ _CORE_TITLE_PATTERNS = (
     "user information",
 )
 
+# Expand broad questions into the vocabulary commonly used in saved notes.
+# This is intentionally deterministic and local: no extra model call or API key.
+_INTENT_PATTERNS: tuple[tuple[re.Pattern[str], tuple[str, ...]], ...] = (
+    (
+        re.compile(
+            r"\b(who am i|about me|about myself|my profile|my background|"
+            r"my interests|my goals|what do you know about me)\b"
+        ),
+        ("profile", "identity", "background", "interests", "goals"),
+    ),
+    (
+        re.compile(
+            r"\b(projects?|building|working on|developing|coding|"
+            r"repositories|repos|apps|websites)\b"
+        ),
+        (
+            "project", "building", "developing", "working", "repository",
+            "repo", "codebase", "application", "app", "website", "software",
+        ),
+    ),
+    (
+        re.compile(
+            r"\b(education|school|class|grade|study|studying|college|"
+            r"university|degree|exam|course)\b"
+        ),
+        (
+            "education", "school", "class", "grade", "study", "studying",
+            "college", "university", "degree", "course", "subject",
+        ),
+    ),
+    (
+        re.compile(
+            r"\b(career|job|profession|future|work goals|career goals)\b"
+        ),
+        ("career", "job", "profession", "future", "goal", "software engineer"),
+    ),
+    (
+        re.compile(
+            r"\b(preferences?|prefer|favourite|favorite|likes?|style)\b"
+        ),
+        ("preference", "prefer", "favorite", "likes", "style"),
+    ),
+)
+
 
     stop_words = {
         "about", "after", "again", "also", "could", "from", "have",
@@ -51,6 +95,19 @@ _CORE_TITLE_PATTERNS = (
         if len(terms) == 12:
             break
     return result
+
+
+def _expand_query_terms(message: str) -> list[str]:
+    """Add domain vocabulary for broad personal-context questions."""
+    normalized = " ".join((message or "").casefold().split())
+    expanded = _terms(normalized)
+    for pattern, aliases in _INTENT_PATTERNS:
+        if pattern.search(normalized):
+            for alias in aliases:
+                for term in _terms(alias):
+                    if term not in expanded:
+                        expanded.append(term)
+    return expanded[:32]
 
 
 def _is_core_memory(item: dict) -> bool:
@@ -80,12 +137,28 @@ def _is_core_memory(item: dict) -> bool:
     return sum(signal in content for signal in profile_signals) >= 2
 
 
+def _relevance_score(item: dict, query_terms: list[str]) -> float:
+    title = str(item.get("title") or "").casefold()
+    content = str(item.get("content") or "").casefold()
+    tags = " ".join(str(tag) for tag in (item.get("tags") or [])).casefold()
+
+    score = 0.0
+    for term in query_terms:
+        if term in title:
+            score += 6.0
+        if term in tags:
+            score += 5.0
+        if term in content:
+            score += 1.0
+    return score
+
+
 def retrieve_memory_context(user_id: str | None, message: str) -> str:
     """Retrieve core profile notes plus memories relevant to the latest message.
 
     Core memories are always available to the conversation. Other memories are
-    selected by lightweight lexical relevance. Saved memory is reference data,
-    never an instruction source.
+    selected by intent-expanded lexical relevance. Saved memory is reference
+    data, never an instruction source.
     """
     if not user_id:
         return ""
@@ -107,7 +180,7 @@ def retrieve_memory_context(user_id: str | None, message: str) -> str:
     if not memories:
         return ""
 
-    query_terms = _terms(message or "")
+    query_terms = _expand_query_terms(message or "")
 
     def relevance(item: dict) -> tuple[float, str]:
         title = str(item.get("title") or "").casefold()
