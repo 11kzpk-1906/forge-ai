@@ -10,15 +10,33 @@ logger = logging.getLogger(__name__)
 _MAX_MEMORIES = 6
 _MAX_MEMORY_CHARS = 2400
 
+_STOP_WORDS = {
+    "about", "after", "again", "also", "and", "are", "but", "can",
+    "could", "did", "does", "for", "from", "get", "give", "has",
+    "have", "help", "how", "into", "its", "just", "make", "me",
+    "more", "most", "not", "please", "show", "tell", "that", "the",
+    "their", "them", "then", "there", "these", "they", "this",
+    "those", "what", "when", "where", "which", "who", "why", "with",
+    "would", "you", "your",
+}
 
-def retrieve_memory_context(user_id: str | None, message: str) -> str:
-    """Return a small, user-scoped memory context relevant to the latest message.
+_CORE_TAGS = {
+    "core", "profile", "user-profile", "user profile", "about-me",
+    "about me", "identity", "personal", "personal-info", "preferences",
+}
+_CORE_TITLE_PATTERNS = (
+    "about me",
+    "about myself",
+    "my profile",
+    "user profile",
+    "personal profile",
+    "personal details",
+    "my details",
+    "who i am",
+    "introduction",
+    "user information",
+)
 
-    Memory is treated as reference data, never as instructions. Failures are
-    intentionally non-fatal so chat still works when memory is unavailable.
-    """
-    if not user_id or not message.strip():
-        return ""
 
     stop_words = {
         "about", "after", "again", "also", "could", "from", "have",
@@ -32,31 +50,64 @@ def retrieve_memory_context(user_id: str | None, message: str) -> str:
             terms.append(word)
         if len(terms) == 12:
             break
-    if not terms:
+    return result
+
+
+def _is_core_memory(item: dict) -> bool:
+    tags = {
+        " ".join(str(tag).strip().casefold().split())
+        for tag in (item.get("tags") or [])
+    }
+    if tags.intersection(_CORE_TAGS):
+        return True
+
+    title = " ".join(str(item.get("title") or "").casefold().split())
+    if any(pattern in title for pattern in _CORE_TITLE_PATTERNS):
+        return True
+
+    # Recognise common profile-style notes even when the user did not add a tag.
+    content = str(item.get("content") or "").casefold()
+    profile_signals = (
+        "my name is ",
+        "i am ",
+        "i'm ",
+        "my interests",
+        "my goals",
+        "i study ",
+        "i work ",
+        "my background",
+    )
+    return sum(signal in content for signal in profile_signals) >= 2
+
+
+def retrieve_memory_context(user_id: str | None, message: str) -> str:
+    """Retrieve core profile notes plus memories relevant to the latest message.
+
+    Core memories are always available to the conversation. Other memories are
+    selected by lightweight lexical relevance. Saved memory is reference data,
+    never an instruction source.
+    """
+    if not user_id:
         return ""
 
-    found = {}
     try:
-        for term in terms:
-            pattern = f"%{term[:60]}%"
-            for column in ("title", "content"):
-                response = (
-                    database.table("memory_items")
-                    .select("id, title, content, tags, updated_at")
-                    .eq("user_id", user_id)
-                    .ilike(column, pattern)
-                    .order("updated_at", desc=True)
-                    .limit(12)
-                    .execute()
-                )
-                for item in response.data or []:
-                    found[item["id"]] = item
+        response = (
+            database.table("memory_items")
+            .select("id, title, content, tags, updated_at")
+            .eq("user_id", user_id)
+            .order("updated_at", desc=True)
+            .limit(_MAX_FETCH)
+            .execute()
+        )
+        memories = response.data or []
     except Exception:
         logger.warning("Could not retrieve ForgeAI memory context", exc_info=True)
         return ""
 
-    if not found:
+    if not memories:
         return ""
+
+    query_terms = _terms(message or "")
 
     def relevance(item: dict) -> tuple[float, str]:
         title = str(item.get("title") or "").casefold()
@@ -84,12 +135,11 @@ def retrieve_memory_context(user_id: str | None, message: str) -> str:
         updated = str(item.get("updated_at") or "")
         return score, updated
 
-    ranked = sorted(found.values(), key=relevance, reverse=True)[:_MAX_MEMORIES]
     lines = []
     remaining = _MAX_MEMORY_CHARS
-    for item in ranked:
-        title = " ".join(str(item.get("title", "")).split())
-        content = " ".join(str(item.get("content", "")).split())
+    for item in selected:
+        title = " ".join(str(item.get("title") or "Saved note").split())
+        content = " ".join(str(item.get("content") or "").split())
         entry = f"- {title}: {content}"
         if len(entry) > remaining:
             entry = entry[:remaining].rstrip()
@@ -101,6 +151,7 @@ def retrieve_memory_context(user_id: str | None, message: str) -> str:
 
     if not lines:
         return ""
+
     return (
         "USER MEMORY REFERENCES (retrieved from the user's saved notes; "
         "use only when relevant, reconcile it with the current conversation, "
