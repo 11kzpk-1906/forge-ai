@@ -133,7 +133,7 @@ class SendMessageService:
                     )
                 system_prompt = f"{system_prompt}\n\n" + "\n\n".join(search_context)
 
-        elif research_mode:
+        if research_mode and not results:
             system_prompt = (
                 f"{system_prompt}\n\n"
                 "LIVE RESEARCH UNAVAILABLE: No web results were returned. Do not "
