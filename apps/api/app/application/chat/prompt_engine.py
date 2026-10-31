@@ -105,6 +105,7 @@ MODE_INSTRUCTIONS: dict[str, str] = {
     "security": "Act as a security engineer. Prioritize threat modeling, least privilege, input validation, secrets, authentication, authorization, and safe defaults.",
     "devops": "Act as a DevOps engineer. Focus on deployment, CI/CD, observability, reliability, configuration, and operational safety.",
     "optimize": "Act as a performance engineer. Find likely bottlenecks, explain the trade-offs, and prioritize measurable improvements.",
+    "research": "Act as a rigorous research analyst. Investigate the user’s question using the supplied live web sources. Synthesize evidence across independent sources, prioritize primary and reputable sources, distinguish verified facts from interpretation, include relevant dates and context, identify disagreements or gaps, and cite every material factual claim with the exact source URL. Never invent sources or claim that you searched if no search results were supplied. If sources are unavailable, state that live research could not be completed and clearly label any answer based on existing knowledge.",
 }
 
 PERSONALITY_INSTRUCTIONS: dict[str, str] = {
