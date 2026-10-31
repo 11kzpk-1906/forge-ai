@@ -20,11 +20,17 @@ def retrieve_memory_context(user_id: str | None, message: str) -> str:
     if not user_id or not message.strip():
         return ""
 
+    stop_words = {
+        "about", "after", "again", "also", "could", "from", "have",
+        "help", "into", "just", "make", "more", "most", "please",
+        "that", "them", "then", "there", "this", "what", "when",
+        "where", "which", "with", "would", "your",
+    }
     terms = []
-    for word in re.findall(r"[A-Za-z0-9_+#.-]{4,}", message.casefold()):
-        if word not in terms:
+    for word in re.findall(r"[A-Za-z0-9_+#.-]{3,}", message.casefold()):
+        if word not in stop_words and word not in terms:
             terms.append(word)
-        if len(terms) == 3:
+        if len(terms) == 8:
             break
     if not terms:
         return ""
@@ -40,7 +46,7 @@ def retrieve_memory_context(user_id: str | None, message: str) -> str:
                     .eq("user_id", user_id)
                     .ilike(column, pattern)
                     .order("updated_at", desc=True)
-                    .limit(_MAX_MEMORIES)
+                    .limit(12)
                     .execute()
                 )
                 for item in response.data or []:
@@ -52,11 +58,23 @@ def retrieve_memory_context(user_id: str | None, message: str) -> str:
     if not found:
         return ""
 
-    ranked = sorted(
-        found.values(),
-        key=lambda item: item.get("updated_at") or "",
-        reverse=True,
-    )[:_MAX_MEMORIES]
+    def relevance(item: dict) -> tuple[float, str]:
+        title = str(item.get("title") or "").casefold()
+        content = str(item.get("content") or "").casefold()
+        tags = " ".join(str(tag) for tag in (item.get("tags") or [])).casefold()
+        score = 0.0
+        for term in terms:
+            if term in title:
+                score += 5.0
+            if term in tags:
+                score += 4.0
+            if term in content:
+                score += 1.0
+        # Recency breaks close relevance ties without overriding topic match.
+        updated = str(item.get("updated_at") or "")
+        return score, updated
+
+    ranked = sorted(found.values(), key=relevance, reverse=True)[:_MAX_MEMORIES]
     lines = []
     remaining = _MAX_MEMORY_CHARS
     for item in ranked:

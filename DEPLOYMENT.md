@@ -24,6 +24,7 @@ Set these server-side environment variables:
 | --- | --- | --- |
 | `GROQ_API_KEY` | Yes for AI responses | Groq API key |
 | `GROQ_MODEL` | Optional | Model supported by your Groq account; defaults to the value in `apps/api/.env.example` |
+| `TAVILY_API_KEY` | Optional | Enables automatic live web search for time-sensitive questions. Keep this key server-side. |
 | `SUPABASE_URL` | Yes | Supabase project URL |
 | `SUPABASE_SECRET_KEY` | Yes | Server-side Supabase secret; keep private |
 | `CORS_ORIGINS` | Yes for cross-origin browser requests | Comma-separated exact origins, including the deployed Vercel origin and any local development origins you need |
